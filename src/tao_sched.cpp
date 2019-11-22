@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <vector>
 #include <fstream>
+#ifdef EXTRAE
+#include "extrae_user_events.h"
+#endif
 #include "xitao_workspace.h"
 using namespace xitao;
 
@@ -183,7 +186,10 @@ int gotao_init_hw( int nthr, int thrb, int nhwc)
   tao_barrier = new cxx_barrier(2);
   for(int i = 0; i < gotao_nthreads; i++){
     t[i]  = new std::thread(worker_loop, i);   
-  }  
+  }
+  #ifdef EXTRAE
+   Extrae_init();
+  #endif  
   if(!suppress_init_warnings) std::cout << "XiTAO initialized with " << gotao_nthreads << " threads and configured with " << XITAO_MAXTHREADS << " max threads " << std::endl;
 #ifdef DEBUG
   for(int i = 0; i < static_resource_mapper.size(); ++i) { 
@@ -251,6 +257,9 @@ int gotao_fini()
   for(int i = 0; i < gotao_nthreads; i++){
     t[i]->join();
   }
+  #ifdef EXTRAE
+   Extrae_fini();
+  #endif
 }
 
 void gotao_barrier()
@@ -379,13 +388,22 @@ int worker_loop(int nthread)
     int random_core = 0;
     AssemblyTask *assembly = nullptr;
     SimpleTask *simple = nullptr;
-
+  #ifdef EXTRAE
+        bool stealing = false;
+  #endif
   // 0. If a task is already provided via forwarding then exeucute it (simple task)
   //    or insert it into the assembly queues (assembly task)
     if(st){
       if(st->type == TASK_SIMPLE){
         SimpleTask *simple = (SimpleTask *) st;
+  #ifdef EXTRAE
+             // Extrae_event(EXTRAE_SIMPLE_START, st->taskid);
+            Extrae_event(EXTRAE_SIMPLE_START, 1);
+  #endif
         simple->f(simple->args, nthread);
+  #ifdef EXTRAE
+              Extrae_event(EXTRAE_SIMPLE_STOP, 0);
+  #endif
 
   #ifdef DEBUG
         LOCK_ACQUIRE(output_lck);
@@ -426,7 +444,10 @@ int worker_loop(int nthread)
     if(st) {
       int _final; // remaining
       assembly = (AssemblyTask *) st;
-
+#ifdef EXTRAE
+      //Extrae_event(EXTRAE_ASSEMBLY_START, assembly->taskid);
+      Extrae_event(20, 2);
+#endif
 #if defined(CRIT_PERF_SCHED)
       std::chrono::time_point<std::chrono::system_clock> t1,t2; 
       if(assembly->leader == nthread){
@@ -456,6 +477,9 @@ int worker_loop(int nthread)
           assembly->set_timetable(nthread,((4*oldticks+ticks)/5),width_index);         
         }
     }
+#endif
+#ifdef EXTRAE
+      Extrae_event(20, 0);
 #endif
     _final = (++assembly->threads_out_tao == assembly->width);
      st = nullptr;
@@ -493,6 +517,12 @@ int worker_loop(int nthread)
   // TAO_WIDTH determines which threads participates in stealing
   // STEAL_ATTEMPTS determines number of steals before retrying the loop
     if(STEAL_ATTEMPTS && !(rand_r(&seed) % STEAL_ATTEMPTS)){
+#ifdef EXTRAE
+      if(!stealing){
+        stealing = true;
+        Extrae_event(30, 3);
+        }
+#endif
       int attempts = 1;
       do{
         do{
@@ -516,6 +546,10 @@ int worker_loop(int nthread)
         LOCK_RELEASE(worker_lock[random_core]);  
       }while(!st && (attempts-- > 0));
       if(st){
+#ifdef EXTRAE
+       stealing = false;
+       Extrae_event(30, 0);
+#endif
         continue;
       }
     } 

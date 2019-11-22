@@ -2,7 +2,8 @@ CC = gcc
 CXX = g++ 
 
 #DEBUG = 1
-
+EXTRAEINC=-I/c3se/users/pirah/Hebbe/Documents/dat400lab3/extrae/include/
+EXTRAELIBS=-L/c3se/users/pirah/Hebbe/Documents/dat400lab3/extrae/lib -lpttrace
 #include makefile.inc
 include makefile.sched
 EXAMPLES += benchmarks
@@ -23,10 +24,10 @@ LFLAGS :=
 LOIFLAGS := -DMERGEBLOCK=4096
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LOIFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LOIFLAGS) -c $< -o $@ $(EXTRAELIBS)
 
 %.o : %.cxx
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LOIFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LOIFLAGS) -c $< -o $@ $(EXTRAELIBS)
 
 
 CXXFLAGS += -I$(INCS)
@@ -44,7 +45,7 @@ all: lib
 	cd $(EXAMPLES)/dataparallel && $(MAKE) clean && $(MAKE) 
 
 %.o : %.cxx
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(EXTRAELIBS)
 
 lib: clean libxitao.a
 

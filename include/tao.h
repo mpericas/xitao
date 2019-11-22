@@ -162,4 +162,16 @@ public:
 template <typename FuncType, typename IterType>
 float ParForTask<FuncType, IterType>::time_table[XITAO_MAXTHREADS][XITAO_MAXTHREADS]; 
 #endif
+
+//events
+enum extrae_events{
+        EXTRAE_SIMPLE_START,
+        EXTRAE_SIMPLE_STOP,
+        EXTRAE_ASSEMBLY_START,
+        EXTRAE_ASSEMBLY_STOP,
+        EXTRAE_STEALING,
+        EXTRAE_STEALING_STOP,
+        XITAO_EVENT,
+};
+
 #endif // _TAO_H

@@ -1,0 +1,232 @@
+DEFAULT_OPTIONS
+
+LEVEL               THREAD
+UNITS               NANOSEC
+LOOK_BACK           100
+SPEED               1
+FLAG_ICONS          ENABLED
+NUM_OF_STATE_COLORS 1000
+YMAX_SCALE          37
+
+
+DEFAULT_SEMANTIC
+
+THREAD_FUNC          State As Is
+
+
+STATES
+0    Idle
+1    Running
+2    Not created
+3    Waiting a message
+4    Blocking Send
+5    Synchronization
+6    Test/Probe
+7    Scheduling and Fork/Join
+8    Wait/WaitAll
+9    Blocked
+10    Immediate Send
+11    Immediate Receive
+12    I/O
+13    Group Communication
+14    Tracing Disabled
+15    Others
+16    Send Receive
+17    Memory transfer
+18    Profiling
+19    On-line analysis
+20    Remote memory access
+21    Atomic memory operation
+22    Memory ordering operation
+23    Distributed locking
+24    Overhead
+25    One-sided op
+26    Startup latency
+27    Waiting links
+28    Data copy
+29    RTT
+30    Allocating memory
+31    Freeing memory
+
+
+STATES_COLOR
+0    {117,195,255}
+1    {0,0,255}
+2    {255,255,255}
+3    {255,0,0}
+4    {255,0,174}
+5    {179,0,0}
+6    {0,255,0}
+7    {255,255,0}
+8    {235,0,0}
+9    {0,162,0}
+10    {255,0,255}
+11    {100,100,177}
+12    {172,174,41}
+13    {255,144,26}
+14    {2,255,177}
+15    {192,224,0}
+16    {66,66,66}
+17    {255,0,96}
+18    {169,169,169}
+19    {169,0,0}
+20    {0,109,255}
+21    {200,61,68}
+22    {200,66,0}
+23    {0,41,0}
+24    {139,121,177}
+25    {116,116,116}
+26    {200,50,89}
+27    {255,171,98}
+28    {0,68,189}
+29    {52,43,0}
+30    {255,46,0}
+31    {100,216,32}
+
+
+EVENT_TYPE
+0    61000000    pthread call
+VALUES
+0 Outside pthread call
+2 pthread_create
+3 pthread_join
+
+
+EVENT_TYPE
+0    60000020    pthread function
+VALUES
+0   End
+1 Unresolved
+2 _NOT_Found
+3 execute_.._routine [execute_native_thread_routine]
+
+
+EVENT_TYPE
+0    60000120    pthread function line and file
+VALUES
+0   End
+1 0 (Unresolved)
+2 0 (_NOT_Found)
+3 77 (thread.cc, libstdc++.so.6.0.21)
+
+
+EVENT_TYPE
+6    40000033    Executing CPU
+6    40000133    CPU-Event sampling interval
+
+
+EVENT_TYPE
+6    40000001    Application
+VALUES
+0      End
+1      Begin
+
+
+EVENT_TYPE
+6    40000050    RAW clock() value from system
+
+
+EVENT_TYPE
+6    40000003    Flushing Traces
+VALUES
+0      End
+1      Begin
+
+
+EVENT_TYPE
+6    40000002    Trace initialization
+VALUES
+0      End
+1      Begin
+
+
+EVENT_TYPE
+6    40000036    Process IDentifier
+6    40000037    Parent Process IDentifier
+6    40000038    fork() depth
+
+
+GRADIENT_COLOR
+0    {0,255,2}
+1    {0,244,13}
+2    {0,232,25}
+3    {0,220,37}
+4    {0,209,48}
+5    {0,197,60}
+6    {0,185,72}
+7    {0,173,84}
+8    {0,162,95}
+9    {0,150,107}
+10    {0,138,119}
+11    {0,127,130}
+12    {0,115,142}
+13    {0,103,154}
+14    {0,91,166}
+
+
+GRADIENT_NAMES
+0    Gradient 0
+1    Grad. 1/MPI Events
+2    Grad. 2/OMP Events
+3    Grad. 3/OMP locks
+4    Grad. 4/User func
+5    Grad. 5/User Events
+6    Grad. 6/General Events
+7    Grad. 7/Hardware Counters
+8    Gradient 8
+9    Gradient 9
+10    Gradient 10
+11    Gradient 11
+12    Gradient 12
+13    Gradient 13
+14    Gradient 14
+
+
+EVENT_TYPE
+0 41000000 Object addresses for task 1.1
+VALUES
+1 completed.6840 [0x0040a640-0x0040a640]
+2 _ZStL8__ioinit [0x0040a960-0x0040a960]
+3 _ZStL8__ioinit [0x0040a961-0x0040a961]
+4 _ZStL8__ioinit [0x0040a968-0x0040a968]
+5 __FRAME_END__ [0x00409978-0x00409977]
+6 _IO_stdin_used [0x00408360-0x00408363]
+7 _ZN9VecMulDyn10time_tableE [0x0040a760-0x0040a85f]
+8 _ZN6VecAdd10time_tableE [0x0040a660-0x0040a75f]
+9 _ZSt4cout [0x0040b9c0-0x0040bacf]
+10 _ZN5xitao14gotao_nthreadsE [0x0040ae88-0x0040ae8b]
+11 _ZN5xitao16tao_total_stealsE [0x0040b2d0-0x0040b2d7]
+12 _ZTVN10__cxxabiv117__class_type_infoE [0x0040bae0-0x0040bb37]
+13 _ZTVN10__cxxabiv120__si_class_type_infoE [0x0040bb40-0x0040bb97]
+14 _ZN9VecMulSta10time_tableE [0x0040a860-0x0040a95f]
+15 _ZN5xitao27resources_runtime_conrolledE [0x0040ae79-0x0040ae79]
+16 _ZN5xitao23runtime_resource_mapperE [0x0040ae60-0x0040ae77]
+17 _ZN5xitao16starting_barrierE [0x0040b2c8-0x0040b2cf]
+18 _ZN5xitao20inclusive_partitionsE [0x0040adc0-0x0040add7]
+19 _ZN5xitao14worker_ready_qB5cxx11E [0x0040b900-0x0040b9bf]
+20 _ZN5xitao17worker_assembly_qE [0x0040b300-0x0040b8ff]
+21 _ZN5xitao11worker_lockE [0x0040abc0-0x0040adbf]
+22 _ZN5xitao20worker_assembly_lockE [0x0040a9c0-0x0040abbf]
+23 _ZN5xitao16task_completionsE [0x0040b0c0-0x0040b2bf]
+24 _ZN8PolyTask13pending_tasksE [0x0040a964-0x0040a967]
+25 _ZN5xitao9task_poolE [0x0040aec0-0x0040b0bf]
+26 _ZN5xitao14gotao_can_exitE [0x0040ae7c-0x0040ae7c]
+27 _ZN5xitao17gotao_thread_baseE [0x0040ae80-0x0040ae83]
+28 _ZN5xitao22static_resource_mapperE [0x0040ae00-0x0040ae17]
+29 _ZN5xitao17gotao_initializedE [0x0040ae7b-0x0040ae7b]
+30 _ZN5xitao13gotao_startedE [0x0040ae7a-0x0040ae7a]
+31 _ZN5xitao13critical_pathE [0x0040ae8c-0x0040ae8f]
+32 _ZN5xitao1tE [0x0040ae20-0x0040ae5f]
+33 _ZN5xitao11tao_barrierE [0x0040b2c0-0x0040b2c7]
+34 _ZN5xitao16smpd_region_lockE [0x0040a980-0x0040a9a7]
+35 _ZN5xitao10ptt_layoutE [0x0040ade0-0x0040adf7]
+36 _ZN5xitao22suppress_init_warningsE [0x0040ae78-0x0040ae78]
+37 _ZN5xitao15gotao_ncontextsE [0x0040ae84-0x0040ae87]
+
+EVENT_TYPE
+9    40000018    Tracing mode:
+VALUES
+1      Detailed
+2      CPU Bursts
+
+

@@ -17,7 +17,8 @@
 #  along with this program; if not, write to the Free Software                               #
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA            #
 ##############################################################################################
-
+EXTRAEINC=-I/c3se/users/pirah/Hebbe/Documents/dat400lab3/extrae/include/
+EXTRAELIBS=-L/c3se/users/pirah/Hebbe/Documents/dat400lab3/extrae/lib/ -lpttrace
 include ../../makefile.sched
 include makefile.dot
 CXXFLAGS += -I../../include -I.
@@ -37,7 +38,8 @@ dotprod: $(PROGRAM_OBJS)
 
 run: dotprod
 	./dotprod 8192 2 16
-
+instrument:
+	EXTRAE_CONFIG_FILE=extrae.xml ./dotprod 8192 2 16
 clean:
 	rm -rf dotprod $(PROGRAM_OBJS) html latex
 
