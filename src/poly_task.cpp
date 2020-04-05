@@ -66,7 +66,7 @@ float PolyTask::get_sta(){             // return sta value
 int PolyTask::clone_sta(PolyTask *pt) { 
   affinity_relative_index = pt->affinity_relative_index;    
   affinity_queue = pt->affinity_queue; // make sure to copy the exact queue
-  return 0;
+  return int(affinity_relative_index * 100.0f);
 }
 void PolyTask::make_edge(PolyTask *t){
   out.push_back(t);
@@ -78,12 +78,16 @@ void PolyTask::make_edge(PolyTask *t){
 
 #if defined(CRIT_PERF_SCHED)
 void PolyTask::history_mold(int _nthread, PolyTask *it){
+  // it->leader = _nthread;
+  // it->width = 1;
   int new_width = 1; 
   int new_leader = -1;
   float shortest_exec = 1000.0f;
   float comp_perf = 0.0f; 
   auto&& partitions = inclusive_partitions[_nthread];
   if(rand()%10 != 0) { 
+  //if(true) { 
+  
     for(auto&& elem : partitions) {
       int leader = elem.first;
       int width  = elem.second;
@@ -106,7 +110,7 @@ void PolyTask::history_mold(int _nthread, PolyTask *it){
     new_leader = rand_partition.first;
     new_width  = rand_partition.second;
   }
-  if(new_leader != -1) {
+  if(new_leader != -1) { 
     it->leader = new_leader;
     it->width  = new_width;
   }
@@ -223,6 +227,42 @@ int PolyTask::globalsearch_PTT(int nthread, PolyTask * it){
   it->leader = new_leader;
   return new_leader;
 }
+
+bool PolyTask::has_better_partition(int thread_a, int thread_b){
+  // auto ptt_val1 = this->get_timetable(thread_a, 0);
+  // auto ptt_val2 = this->get_timetable(thread_b, 0);
+  // if(ptt_val1 < ptt_val2) return true;
+  // return false;
+  float shortest_exec = 1000.0f;
+  float comp_perf = 0.0f; 
+  auto&& partitions_a = inclusive_partitions[thread_a];
+  for(auto&& elem : partitions_a) {
+    int leader = elem.first;
+    int width  = elem.second;
+    auto&& ptt_val = this->get_timetable(leader, width - 1);
+    if(ptt_val == 0.0f) return true;
+    comp_perf = width * ptt_val;
+    //comp_perf = ptt_val;
+    if (comp_perf < shortest_exec) {
+      shortest_exec = comp_perf;
+    }
+  }
+  auto&& partitions_b = inclusive_partitions[thread_b];
+  if(shortest_exec > 0.0f) {
+    for(auto&& elem : partitions_b) {
+      int leader = elem.first;
+      int width  = elem.second;
+      auto&& ptt_val = this->get_timetable(leader, width - 1);
+      if(ptt_val == 0.0f) return false;
+      comp_perf = width * ptt_val;
+      //comp_perf = ptt_val;
+      if (comp_perf < shortest_exec) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 #endif
   
 #ifdef WEIGHT_SCHED
@@ -309,15 +349,21 @@ PolyTask * PolyTask::commit_and_wakeup(int _nthread){
           LOCK_RELEASE(worker_assembly_lock[i]);
         }        
       }
-      else{        
+      else {     
+        int ndx;   
+        if((*it)->affinity_queue != -1){
+          ndx = (*it)->affinity_queue;
+        } else {
+          ndx = _nthread;
+        }
+        LOCK_ACQUIRE(worker_lock[ndx]);
+        worker_ready_q[ndx].push_front(*it);
+        LOCK_RELEASE(worker_lock[ndx]);
 #ifdef DEBUG
         LOCK_ACQUIRE(output_lck);
-        std::cout <<"[DEBUG] Priority=0, task "<< (*it)->taskid <<" is pushed to WSQ of thread "<< _nthread << std::endl;
+        std::cout <<"[DEBUG] Priority=0, task "<< (*it)->taskid <<" is pushed to WSQ of thread "<< ndx << std::endl;
         LOCK_RELEASE(output_lck);
 #endif
-        LOCK_ACQUIRE(worker_lock[_nthread]);
-        worker_ready_q[_nthread].push_front(*it);
-        LOCK_RELEASE(worker_lock[_nthread]);
       }
 #elif defined(WEIGHT_SCHED)
       int ndx2 = weight_sched(_nthread, (*it));

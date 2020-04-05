@@ -39,8 +39,7 @@ class TAO_PAR_FOR_2D_BASE : public AssemblyTask
                                  int nthread=0)
                         : AssemblyTask(width, nthread) 
                 {   
-                       int xchunks; 
-                       int ychunks;
+
 
                        gotao_parfor2D_in = a; 
                        gotao_parfor2D_out = b;
@@ -55,8 +54,14 @@ class TAO_PAR_FOR_2D_BASE : public AssemblyTask
                        internal_chunk_size_x = _chunk_size_x;
                        internal_chunk_size_y = _chunk_size_y;
 
-                       if(!internal_chunk_size_x) 
-                                internal_chunk_size_x = gotao_parfor2D_chunkx / width;
+  
+                      }
+
+                void calculate_moldable_chunks(int thrd) {
+                      int xchunks; 
+                      int ychunks;
+                      if(!internal_chunk_size_x) 
+                        internal_chunk_size_x = gotao_parfor2D_chunkx / width;
 
                        if(!internal_chunk_size_y) 
                                 internal_chunk_size_y = gotao_parfor2D_chunky / width;
@@ -75,7 +80,7 @@ class TAO_PAR_FOR_2D_BASE : public AssemblyTask
                        // is the number of 2D chunks divided by the width
                        steps = (xchunks*ychunks + width - 1)/width;
 
-                       for(int thrd = 0; thrd < width; thrd++){
+                       // for(int thrd = 0; thrd < width; thrd++){
                           for(int st = 0; st < steps; st++){
                               int index = thrd*steps + st; 
                               int index_x = index%xchunks;
@@ -86,10 +91,10 @@ class TAO_PAR_FOR_2D_BASE : public AssemblyTask
                               dow[index].chunkx = internal_chunk_size_x;
                               dow[index].chunky = internal_chunk_size_y;
                               }
-                            }
-                      }
+                            // }
 
 
+                }
                 // the following are global parameters and need to be visible
                 void *gotao_parfor2D_in; 
                 void *gotao_parfor2D_out;
@@ -115,7 +120,7 @@ class TAO_PAR_FOR_2D_BASE : public AssemblyTask
                 void execute(int threadid)
                 {
                 int tid = threadid - leader;
-
+                calculate_moldable_chunks(tid);
                 for(int s = 0; s < steps; s++){
                    gotao_parfor2D_af *unit = &dow[tid*steps + s];
                    compute_for2D(

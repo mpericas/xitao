@@ -266,6 +266,7 @@ int gotao_push(PolyTask *pt, int queue)
 #ifdef CRIT_PERF_SCHED  
   pt->_ptt = xitao_ptt::try_insert_table(pt, pt->workload_hint);    /*be sure that a single orphaned task has a PTT*/
 #endif  
+  std::cout << "Pushing task in queue " << queue << std::endl;
   LOCK_ACQUIRE(worker_lock[queue]);
   worker_ready_q[queue].push_front(pt);
   LOCK_RELEASE(worker_lock[queue]);
@@ -340,12 +341,15 @@ int worker_loop(int nthread)
     std::cout << "Thread " << nthread << " is deactivated since it is not included in any PTT partition" << std::endl;      
     return 0;
   }
+#if defined(MEASURE_IDLENESS)
+  auto thread_start = std::chrono::system_clock::now();
+  double work_time = 0.0;
+#endif
   while(true)
   {    
     int random_core = 0;
     AssemblyTask *assembly = nullptr;
     SimpleTask *simple = nullptr;
-
   // 0. If a task is already provided via forwarding then exeucute it (simple task)
   //    or insert it into the assembly queues (assembly task)
     if(st){
@@ -392,8 +396,10 @@ int worker_loop(int nthread)
     if(st) {
       int _final; // remaining
       assembly = (AssemblyTask *) st;
-
-#if defined(CRIT_PERF_SCHED)
+#if defined(MEASURE_IDLENESS)
+      std::chrono::time_point<std::chrono::system_clock> t1,t2; 
+      t1 = std::chrono::system_clock::now();
+#elif defined(CRIT_PERF_SCHED)
       std::chrono::time_point<std::chrono::system_clock> t1,t2; 
       if(assembly->leader == nthread){
         t1 = std::chrono::system_clock::now();
@@ -406,12 +412,21 @@ int worker_loop(int nthread)
       LOCK_RELEASE(output_lck);
 #endif
       assembly->execute(nthread);
-
-#if defined(CRIT_PERF_SCHED)
+#if defined(MEASURE_IDLENESS)
+      t2 = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = t2-t1;
+      double ticks = elapsed_seconds.count();
+      work_time += ticks;
+#elif defined(CRIT_PERF_SCHED)
+      double ticks;
       if(assembly->leader == nthread){
         t2 = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = t2-t1;
-        double ticks = elapsed_seconds.count();
+        ticks = elapsed_seconds.count();
+      }
+#endif
+#if defined(CRIT_PERF_SCHED)
+      if(assembly->leader == nthread){
         int width_index = assembly->width - 1;
         //Weight the newly recorded ticks to the old ticks 1:4 and save
         float oldticks = assembly->get_timetable( nthread,width_index);
@@ -468,8 +483,16 @@ int worker_loop(int nthread)
         LOCK_ACQUIRE(worker_lock[random_core]);
         if(!worker_ready_q[random_core].empty()){
           st = worker_ready_q[random_core].back(); 
+#if defined(CRIT_PERF_SCHED) && defined (STA_AWARE_STEALING)
+          if (!(st->has_better_partition(nthread, random_core))) {
+            LOCK_RELEASE(worker_lock[random_core]); 
+            st = NULL;
+            continue;
+          }
+#endif
           worker_ready_q[random_core].pop_back();
           tao_total_steals++;  
+
     #ifdef DEBUG
           LOCK_ACQUIRE(output_lck);
           std::cout << "[DEBUG] Thread " << nthread << " steal a task from " << random_core << " successfully. \n";
@@ -515,6 +538,12 @@ int worker_loop(int nthread)
     LOCK_RELEASE(worker_lock[nthread]);
     // Finally check if the program has terminated
     if(gotao_can_exit && (PolyTask::pending_tasks == 0)){
+      auto thread_end = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = thread_end - thread_start;
+      auto total_thread_time = elapsed_seconds.count();
+      LOCK_ACQUIRE(output_lck);
+      std::cout << "Thread " << nthread << " idle time: " <<  total_thread_time - work_time << " work time: " << work_time << std::endl; 
+      LOCK_RELEASE(output_lck);
       break;
     }
   }

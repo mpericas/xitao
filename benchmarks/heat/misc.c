@@ -59,7 +59,7 @@ int initialize( algoparam_t *param, int no_padding )
 	posix_memalign( (void**) &(param->u), alignment, sizeof(double)*psize*psize );
 	posix_memalign( (void**) &(param->uhelp), alignment, sizeof(double)*psize*psize );
     }
-    (param->uvis)  = (double*)calloc( sizeof(double),
+    (param->uvis)  = (double*)calloc( sizeof(double) ,
 				      (param->visres+2) *
 				      (param->visres+2) );
 

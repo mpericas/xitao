@@ -68,6 +68,9 @@ public:
   virtual void set_timetable(int thread, float ticks, int index);
   //History-based molding
   void history_mold(int _nthread, PolyTask *it);
+  //Check and see if PTT of thread_a has at least 1 better entry than thread_b
+  bool has_better_partition(int thread_a, int thread_b);
+
   //Recursive function assigning criticality
   int set_criticality();
   int set_marker(int i);

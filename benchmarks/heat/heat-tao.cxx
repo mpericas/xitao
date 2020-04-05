@@ -206,7 +206,13 @@ int main( int argc, char *argv[] )
                              ceildiv(np, ixdecomp*exdecomp), // (np + ixdecomp*exdecomp -1) / (ixdecomp*exdecomp),
                              ceildiv(np, iydecomp*eydecomp), //(np + iydecomp*eydecomp -1) / (iydecomp*eydecomp), 
                              awidth);
-          init1[x][y]->set_sta((float) (x * eydecomp + y) / (float) (exdecomp*eydecomp));
+          auto sta_val = (float) (x * eydecomp + y) / (float) (exdecomp*eydecomp);
+          
+          init1[x][y]->set_sta(sta_val);
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)
+          init1[x][y]->workload_hint = (int)(sta_val * 100000.0f);
+#endif
+          //std::cout << init1[x][y]->workload_hint << std::endl;
           gotao_push(init1[x][y]); // insert into affinity queue
        }
 
@@ -231,8 +237,12 @@ int main( int argc, char *argv[] )
                              ceildiv(np, ixdecomp*exdecomp), // (np + ixdecomp*exdecomp -1) / (ixdecomp*exdecomp),
                              ceildiv(np, iydecomp*eydecomp), //(np + iydecomp*eydecomp -1) / (iydecomp*eydecomp), 
                              awidth);
-
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)
+          init2[x][y]->workload_hint = init2[x][y]->clone_sta(init1[x][y]);
+#else 
           init2[x][y]->clone_sta(init1[x][y]);
+#endif
+
           init1[x][y]->make_edge(init2[x][y]);
        }
     // when not using NUMA allocation, we do not need to run any of this code since both u and uhelp are already initialized
@@ -256,7 +266,11 @@ int main( int argc, char *argv[] )
                              awidth);
 
 #ifdef NUMA_ALLOC
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)
+          stc[iter][x][y]->workload_hint = stc[iter][x][y]->clone_sta(init2[x][y]);
+#else
           stc[iter][x][y]->clone_sta(init2[x][y]);
+#endif
           init2[x][y]->make_edge(stc[iter][x][y]);
 
           if((x-1)>=0)       init2[x-1][y]->make_edge(stc[iter][x][y]);
@@ -265,7 +279,13 @@ int main( int argc, char *argv[] )
           if((y+1)<eydecomp) init2[x][y+1]->make_edge(stc[iter][x][y]);
 #else
 #ifdef TOPOPLACE
-          stc[iter][x][y]->set_sta((float) (x * eydecomp + y) / (float) (exdecomp*eydecomp));
+          auto sta_val = (float) (x * eydecomp + y) / (float) (exdecomp*eydecomp);
+          std::cout << sta_val << std::endl;
+          stc[iter][x][y]->set_sta(sta_val);
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)
+          stc[iter][x][y]->workload_hint = (int) (sta_val * 100000.0f);
+#endif
+
 #else // no topo
           stc[iter][x][y]->set_sta(0.0);
 #endif  // TOPOPLACE
@@ -298,8 +318,14 @@ int main( int argc, char *argv[] )
 
 // this should ensure that we do not overwrite data which has not yet been fully processed
 // necessary because we do not do renaming
-          stc[iter][x][y]->make_edge(cpb[iter][x][y]);
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)         
+          cpb[iter][x][y]->workload_hint = cpb[iter][x][y]->clone_sta(stc[iter][x][y]);
+#else
           cpb[iter][x][y]->clone_sta(stc[iter][x][y]);
+#endif
+
+          stc[iter][x][y]->make_edge(cpb[iter][x][y]);
+          
           cpb[iter][x][y]->criticality = 0; 
           stc[iter][x][y]->criticality = 0; 
           if((x-1)>=0)       stc[iter][x-1][y]->make_edge(cpb[iter][x][y]);
@@ -326,9 +352,13 @@ int main( int argc, char *argv[] )
                              ceildiv(np, ixdecomp*exdecomp), // (np + ixdecomp*exdecomp -1) / (ixdecomp*exdecomp),
                              ceildiv(np, iydecomp*eydecomp), //(np + iydecomp*eydecomp -1) / (iydecomp*eydecomp), 
                              awidth);
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)         
+          stc[iter][x][y]->workload_hint = stc[iter][x][y]->clone_sta(cpb[iter-1][x][y]);
+#else
+          stc[iter][x][y]->clone_sta(cpb[iter-1][x][y]);
+#endif
 
           cpb[iter-1][x][y]->make_edge(stc[iter][x][y]);
-          stc[iter][x][y]->clone_sta(cpb[iter-1][x][y]);
           cpb[iter-1][x][y]->criticality = 0; 
           stc[iter][x][y]->criticality = 0; 
 
@@ -358,8 +388,13 @@ int main( int argc, char *argv[] )
 
 // this should ensure that we do not overwrite data which has not yet been fully processed
 // necessary because we do not do renaming
-          stc[iter][x][y]->make_edge(cpb[iter][x][y]);
+#if defined(STA_AWARE_STEALING) && defined(CRIT_PERF_SCHED)
+          cpb[iter][x][y]->workload_hint = cpb[iter][x][y]->clone_sta(stc[iter][x][y]);
+#else
           cpb[iter][x][y]->clone_sta(stc[iter][x][y]);
+#endif
+          stc[iter][x][y]->make_edge(cpb[iter][x][y]);
+          
 
           if((x-1)>=0)       stc[iter][x-1][y]->make_edge(cpb[iter][x][y]);
           if((x+1)<exdecomp) stc[iter][x+1][y]->make_edge(cpb[iter][x][y]);
@@ -463,10 +498,10 @@ int main( int argc, char *argv[] )
          param.visres+2, 
          param.visres+2 );
 
-#if defined(CRIT_PERF_SCHED)  
-  copy2D::print_ptt(copy2D::time_table, "copy2D");
-  jacobi2D::print_ptt(jacobi2D::time_table, "jacobi2D");
-#endif
+// #if defined(CRIT_PERF_SCHED)  
+//   xitao_ptt::print_table<copy2D>("MaCopy");
+//   xitao_ptt::print_table<jacobi2D>("MatStencil");
+// #endif
 
     finalize( &param );
 

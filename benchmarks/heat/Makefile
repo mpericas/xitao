@@ -23,8 +23,8 @@ CFLAGS += -g -I.. -I. -O3 ${EXTRAEINC}
 CXXFLAGS +=$(CFLAGS) -std=c++11 ${EXTRAEINC}
 
 include makefile.heat
-CC=gcc
-CXX=g++
+CC=icc
+CXX=icpc
 LIBS = -lm -L../../lib/ -lxitao -pthread ${EXTRAELIBS}
 HEAT_TAO_OBJS=heat-tao.o misc.o
 HEAT_TBB_OBJS=heat-tbb.o misc.o

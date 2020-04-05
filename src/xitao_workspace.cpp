@@ -24,7 +24,7 @@ namespace xitao {
   GENERIC_LOCK(worker_lock[XITAO_MAXTHREADS]);
   GENERIC_LOCK(worker_assembly_lock[XITAO_MAXTHREADS]);
   std::mutex smpd_region_lock;
-#ifdef DEBUG
+//#ifdef DEBUG
   GENERIC_LOCK(output_lck);
-#endif
+//#endif
 }

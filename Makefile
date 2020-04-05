@@ -1,5 +1,5 @@
-CC = gcc 
-CXX = g++ 
+CC = icc 
+CXX = icpc
 
 DEBUG=0 
 
@@ -37,11 +37,11 @@ LIBS = -pthread -lm -L$(XITAO_LIB) -lxitao ${EXTRAELIBS}
 TAO_OBJS = src/tao_sched.o src/xitao_ptt_key.o src/xitao_ptt.o src/poly_task.o src/xitao_workspace.o src/barriers.o 
 
 all: lib
-	cd $(EXAMPLES)/dotproduct && $(MAKE) clean && $(MAKE) 
-	cd $(EXAMPLES)/randomDAGs && $(MAKE) clean && $(MAKE)
-	cd $(EXAMPLES)/syntheticDAGs && $(MAKE) clean && $(MAKE) 
+#	cd $(EXAMPLES)/dotproduct && $(MAKE) clean && $(MAKE) 
+#	cd $(EXAMPLES)/randomDAGs && $(MAKE) clean && $(MAKE)
+#	cd $(EXAMPLES)/syntheticDAGs && $(MAKE) clean && $(MAKE) 
 	cd $(EXAMPLES)/heat && $(MAKE) clean && $(MAKE) 
-	cd $(EXAMPLES)/dataparallel && $(MAKE) clean && $(MAKE) 
+#	cd $(EXAMPLES)/dataparallel && $(MAKE) clean && $(MAKE) 
 
 %.o : %.cxx
 	$(CXX) $(CXXFLAGS) -c $< -o $@

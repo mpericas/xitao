@@ -77,26 +77,20 @@ class jacobi2D : public TAO_PAR_FOR_2D_BASE
 #endif
 #endif
 
-//                     std::cout << "compute offx " << offx << " offy " << offy 
-//                          << " chunkx " << chunkx << " chunky " << chunky 
-//                          << " xstart " << xstart << " xstop " << xstop 
-//                          << " ystart " << ystart << " ystop " << ystop
-//                          << " affinity "  << get_affinity()
-//                          << " local residual is " << sum << std::endl;
 		return 0;
                 }
 
-#if defined(CRIT_PERF_SCHED)
-  void set_timetable(int threadid, float ticks, int index){
-    time_table[index][threadid] = ticks;
-  }
+// #if defined(CRIT_PERF_SCHED)
+//   void set_timetable(int threadid, float ticks, int index){
+//     time_table[index][threadid] = ticks;
+//   }
 
-  float get_timetable(int threadid, int index){ 
-    float time=0;
-    time = time_table[index][threadid];
-    return time;
-  }
-#endif
+//   float get_timetable(int threadid, int index){ 
+//     float time=0;
+//     time = time_table[index][threadid];
+//     return time;
+//   }
+// #endif
 
 
 
@@ -141,12 +135,6 @@ class copy2D : public TAO_PAR_FOR_2D_BASE
                         for (int j=ystart; j<ystop; j++) 
                            out[ndx(i,j)]= in[ndx(i,j)];
 
-//                    std::cout << "copy: offx " << offx << " offy " << offy 
-//                          << " chunkx " << chunkx << " chunky " << chunky 
-//                          << " xstart " << xstart << " xstop " << xstop 
-//                          << " ystart " << ystart << " ystop " << ystop
-//                          << " affinity "  << get_affinity()  
-//                          << std::endl;
 #if DO_LOI
     kernel_profile_stop(COPY2D);
 #if DO_KRD
@@ -163,17 +151,17 @@ class copy2D : public TAO_PAR_FOR_2D_BASE
     return 0;
                    }
 
-#if defined(CRIT_PERF_SCHED)
-  void set_timetable(int threadid, float ticks, int index){
-    time_table[index][threadid] = ticks;
-  }
+// #if defined(CRIT_PERF_SCHED)
+//   void set_timetable(int threadid, float ticks, int index){
+//     time_table[index][threadid] = ticks;
+//   }
 
-  float get_timetable(int threadid, int index){ 
-    float time=0;
-    time = time_table[index][threadid];
-    return time;
-  }
-#endif
+//   float get_timetable(int threadid, int index){ 
+//     float time=0;
+//     time = time_table[index][threadid];
+//     return time;
+//   }
+// #endif
 
 
 
