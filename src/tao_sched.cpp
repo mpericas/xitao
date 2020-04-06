@@ -549,7 +549,7 @@ int worker_loop(int nthread)
       std::chrono::duration<double> elapsed_seconds = thread_end - thread_start;
       auto total_thread_time = elapsed_seconds.count();
       LOCK_ACQUIRE(output_lck);
-      std::cout << nthread << "," <<  total_thread_time - work_time << " , " << work_time << std::endl; 
+      std::cout << nthread << "," <<  total_thread_time - work_time << "," << work_time << std::endl; 
       LOCK_RELEASE(output_lck);
 #endif
       break;
