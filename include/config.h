@@ -2,6 +2,7 @@
 #define _CONFIG_H
 
 //#define DEBUG
+#define TRACK_STA
 #define MEASURE_IDLENESS
 #define GOTAO_THREAD_BASE 0
 #define GOTAO_NO_AFFINITY (1.0)

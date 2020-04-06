@@ -42,8 +42,17 @@ namespace xitao {
   typedef std::shared_ptr<ptt_value_type> ptt_shared_type;  
 
   /*! a typedef of map that keeps track of the active PTT tables*/
-  typedef std::unordered_map<ptt_key_type, ptt_shared_type, xitao_ptt_hash> tmap;    
+  typedef std::unordered_map<ptt_key_type, ptt_shared_type, xitao_ptt_hash> tmap;
+#ifdef TRACK_STA
+   /*! a typedef of schedule choices*/
+  typedef std::vector<uint32_t> sta_sched_entry_type; 
+ 
+   /*! a typedef of the shared pointer to ptt table type*/
+  typedef std::shared_ptr<sta_sched_entry_type> sta_sched_entry_type_ptr;  
 
+  /*! a typedef of map that keeps track of the active PTT tables*/
+  typedef std::unordered_map<ptt_key_type, sta_sched_entry_type_ptr, xitao_ptt_hash> sta_sched_map_type;
+#endif
   extern std::list<PolyTask *> worker_ready_q[XITAO_MAXTHREADS];
   extern LFQueue<PolyTask *> worker_assembly_q[XITAO_MAXTHREADS];  
   extern long int tao_total_steals;  

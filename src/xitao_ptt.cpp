@@ -1,7 +1,6 @@
 #include "xitao_ptt.h"
 
 
-
 tmap xitao_ptt::runtime_ptt_tables;
 
 ptt_shared_type xitao_ptt::try_insert_table(PolyTask* pt, size_t const& workload_hint) {
@@ -14,20 +13,45 @@ ptt_shared_type xitao_ptt::try_insert_table(PolyTask* pt, size_t const& workload
   // check if entry is new
   if(runtime_ptt_tables.find(tao_info) == runtime_ptt_tables.end()) {
     std::cout << "New table inserted " << workload_hint << std::endl;
-    
+
     // allocate the ptt table and place it in shared pointer
     _ptt = std::make_shared<ptt_value_type>(XITAO_MAXTHREADS * XITAO_MAXTHREADS, 0);
-
     // insert the ptt table to the mapper
     runtime_ptt_tables.insert(std::make_pair(tao_info, _ptt));
+
   } else { 
     // get the existing value
     _ptt = runtime_ptt_tables[tao_info];
+
   } 
   // return the newly created or existing ptt table
   return _ptt;
 }
 
+#ifdef TRACK_STA
+sta_sched_map_type xitao_ptt::schedule_table;
+
+  void xitao_ptt::try_insert_schedule_map(PolyTask* pt, size_t const& workload_hint) {
+    // declare the tao_info to capture its type
+    xitao_ptt_key tao_info (workload_hint, typeid(*pt));
+
+    sta_sched_entry_type_ptr _sta_tracker;
+    // check if entry is new
+    if(schedule_table.find(tao_info) == schedule_table.end()) {
+      // allocate the sta scheduler tracker
+      _sta_tracker = std::make_shared<sta_sched_entry_type>();
+      schedule_table.insert(std::make_pair(tao_info, _sta_tracker));
+    }
+  }
+
+  void xitao_ptt::update_schedule(PolyTask* pt, uint32_t tid){
+    // declare the tao_info to capture its type
+    xitao_ptt_key tao_info (pt->workload_hint, typeid(*pt));
+    auto&& entries = schedule_table[tao_info];
+    entries->push_back(tid);
+  }
+
+#endif
 
 void xitao_ptt::clear_tables() {
   // iterate over all ptts in the hashmap to release the ownership of all PTT pointers

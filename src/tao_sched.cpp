@@ -266,6 +266,9 @@ int gotao_push(PolyTask *pt, int queue)
 #ifdef CRIT_PERF_SCHED  
   pt->_ptt = xitao_ptt::try_insert_table(pt, pt->workload_hint);    /*be sure that a single orphaned task has a PTT*/
 #endif  
+#ifdef TRACK_STA
+  xitao_ptt::try_insert_schedule_map(pt, pt->workload_hint); 
+#endif
   std::cout << "Pushing task in queue " << queue << std::endl;
   LOCK_ACQUIRE(worker_lock[queue]);
   worker_ready_q[queue].push_front(pt);
@@ -411,6 +414,10 @@ int worker_loop(int nthread)
       std::cout << "[DEBUG] Thread "<< nthread << " starts executing task " << assembly->taskid << "......\n";
       LOCK_RELEASE(output_lck);
 #endif
+#ifdef TRACK_STA
+      if(assembly->leader == nthread)
+        xitao_ptt::update_schedule(st, nthread);
+#endif
       assembly->execute(nthread);
 #if defined(MEASURE_IDLENESS)
       t2 = std::chrono::system_clock::now();
@@ -429,7 +436,7 @@ int worker_loop(int nthread)
       if(assembly->leader == nthread){
         int width_index = assembly->width - 1;
         //Weight the newly recorded ticks to the old ticks 1:4 and save
-        float oldticks = assembly->get_timetable( nthread,width_index);
+        float oldticks = assembly->get_timetable(nthread, width_index);
         if(oldticks == 0){
           assembly->set_timetable(nthread,ticks,width_index);
         }

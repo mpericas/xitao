@@ -74,6 +74,9 @@ void PolyTask::make_edge(PolyTask *t){
 #ifdef CRIT_PERF_SCHED    
   t->_ptt = xitao_ptt::try_insert_table(t, t->workload_hint);               /*be sure that the dependent task has a PTT*/  
 #endif    
+#ifdef TRACK_STA
+  xitao_ptt::try_insert_schedule_map(t, t->workload_hint); 
+#endif
 }
 
 #if defined(CRIT_PERF_SCHED)
@@ -85,8 +88,8 @@ void PolyTask::history_mold(int _nthread, PolyTask *it){
   float shortest_exec = 1000.0f;
   float comp_perf = 0.0f; 
   auto&& partitions = inclusive_partitions[_nthread];
-  if(rand()%10 != 0) { 
-  //if(true) { 
+  //if(rand()%10 != 0) { 
+  if(true) { 
   
     for(auto&& elem : partitions) {
       int leader = elem.first;
