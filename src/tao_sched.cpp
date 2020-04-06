@@ -545,12 +545,14 @@ int worker_loop(int nthread)
     LOCK_RELEASE(worker_lock[nthread]);
     // Finally check if the program has terminated
     if(gotao_can_exit && (PolyTask::pending_tasks == 0)){
+#if defined(MEASURE_IDLENESS)      
       auto thread_end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = thread_end - thread_start;
       auto total_thread_time = elapsed_seconds.count();
       LOCK_ACQUIRE(output_lck);
       std::cout << "Thread " << nthread << " idle time: " <<  total_thread_time - work_time << " work time: " << work_time << std::endl; 
       LOCK_RELEASE(output_lck);
+#endif
       break;
     }
   }
