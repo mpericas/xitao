@@ -269,7 +269,6 @@ int gotao_push(PolyTask *pt, int queue)
 #ifdef TRACK_STA
   xitao_ptt::try_insert_schedule_map(pt, pt->workload_hint); 
 #endif
-  std::cout << "Pushing task in queue " << queue << std::endl;
   LOCK_ACQUIRE(worker_lock[queue]);
   worker_ready_q[queue].push_front(pt);
   LOCK_RELEASE(worker_lock[queue]);

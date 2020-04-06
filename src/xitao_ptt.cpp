@@ -12,8 +12,6 @@ ptt_shared_type xitao_ptt::try_insert_table(PolyTask* pt, size_t const& workload
 
   // check if entry is new
   if(runtime_ptt_tables.find(tao_info) == runtime_ptt_tables.end()) {
-    std::cout << "New table inserted " << workload_hint << std::endl;
-
     // allocate the ptt table and place it in shared pointer
     _ptt = std::make_shared<ptt_value_type>(XITAO_MAXTHREADS * XITAO_MAXTHREADS, 0);
     // insert the ptt table to the mapper
