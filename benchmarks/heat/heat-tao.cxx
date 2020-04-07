@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "heat.h"
-
+#include <set>
 using namespace xitao;
 
 #ifdef DO_LOI
@@ -406,8 +406,16 @@ int main( int argc, char *argv[] )
  
    std::cout << "elapsed time: " << elapsed_seconds.count() << "s. " << "Total number of steals: " <<  tao_total_steals << "\n";
 #ifdef TRACK_STA
-   xitao_ptt::print_schedule_map<jacobi2D>();
-   xitao_ptt::print_schedule_map<copy2D>();
+  std::set<size_t> visited_sta;
+  for(int x = 0; x < exdecomp; x++)
+    for(int y = 0; y < eydecomp; y++){
+      auto current_sta = stc[1][x][y]->workload_hint;
+      if(visited_sta.find(current_sta) == visited_sta.end()){
+        visited_sta.insert(current_sta);
+        xitao_ptt::print_schedule_map<jacobi2D>(current_sta);
+        xitao_ptt::print_schedule_map<copy2D>(current_sta);
+      }
+    }
 #endif
    /*
     iter = 0;
