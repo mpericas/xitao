@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <vector>
 #include <fstream>
+#include <assert.h>
 #include "xitao_workspace.h"
 using namespace xitao;
 
@@ -47,6 +48,7 @@ void gotao_init_hw( int nthr, int thrb, int nhwc)
       inclusive_partitions[i].clear();
       ptt_layout[i].clear();
     }
+    gotao_can_exit = false;
   }
   if(nthr>=0) gotao_nthreads = nthr;
   else {    
@@ -228,7 +230,9 @@ void gotao_fini()
     t[i]->join();
   }
 }
-
+void gotao_wait() {
+  while (PolyTask::pending_tasks > 0);
+}
 void gotao_barrier()
 {
   tao_barrier->wait();
@@ -375,9 +379,10 @@ int worker_loop(int nthread)
 #endif        
 #ifdef DEBUG
         LOCK_ACQUIRE(output_lck);
-        std::cout << "[DEBUG] Distributing assembly task " << assembly->taskid << " with width " << assembly->width << " to workers [" << assembly->leader << "," << assembly->leader + assembly->width << ")" << std::endl;
+        std::cout << "[DEBUG] Distributing assembly task " << assembly->taskid << " with width " << assembly->width << " and leader " << assembly->leader << " to workers [" << assembly->leader << "," << assembly->leader + assembly->width << ")" << std::endl;
         LOCK_RELEASE(output_lck);
 #endif
+        assert(assembly->leader >= 0);
         for(int i = assembly->leader; i < assembly->leader + assembly->width; i++){
           LOCK_ACQUIRE(worker_assembly_lock[i]);
           worker_assembly_q[i].push_back(st);
@@ -470,7 +475,7 @@ int worker_loop(int nthread)
 #endif      
 #ifdef DEBUG
       LOCK_ACQUIRE(output_lck);
-      std::cout <<"[DEBUG] Priority=0, task "<< st->taskid <<" will run on thread "<< st->leader << ", width become " << st->width << std::endl;
+      std::cout <<"[DEBUG] Priority=0, task "<< st->taskid <<" will now run on thread "<< st->leader << ", width become " << st->width << std::endl;
       LOCK_RELEASE(output_lck);
 #endif
       continue;

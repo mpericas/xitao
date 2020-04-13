@@ -21,7 +21,8 @@ std::atomic<double> PolyTask::bias;
 std::atomic<int> PolyTask::created_tasks;
 #endif
 
-PolyTask::PolyTask(int t, int _nthread=0) : type(t){
+PolyTask::PolyTask(int t, bool increment_pool = true, int _nthread=0) : 
+add_to_task_pool(increment_pool), type(t) {
   refcount = 0;
 #define GOTAO_NO_AFFINITY (1.0)
   affinity_relative_index = GOTAO_NO_AFFINITY;
@@ -29,16 +30,18 @@ PolyTask::PolyTask(int t, int _nthread=0) : type(t){
 #if defined(DEBUG) 
   taskid = created_tasks += 1;
 #endif
-  LOCK_ACQUIRE(worker_lock[_nthread]);
-  if(task_pool[_nthread].tasks == 0) {
-    pending_tasks += TASK_POOL;
-    task_pool[_nthread].tasks = TASK_POOL-1;
-      #ifdef DEBUG
-    std::cout << "[DEBUG] Requested: " << TASK_POOL << " tasks. Pending is now: " << pending_tasks << "\n";
-      #endif
+  if(add_to_task_pool) {
+    LOCK_ACQUIRE(worker_lock[_nthread]);
+    if(task_pool[_nthread].tasks == 0) {
+      pending_tasks += TASK_POOL;
+      task_pool[_nthread].tasks = TASK_POOL-1;
+        #ifdef DEBUG
+      std::cout << "[DEBUG] Requested: " << TASK_POOL << " tasks. Pending is now: " << pending_tasks << "\n";
+        #endif
+    }
+    else task_pool[_nthread].tasks--;
+    LOCK_RELEASE(worker_lock[_nthread]);
   }
-  else task_pool[_nthread].tasks--;
-  LOCK_RELEASE(worker_lock[_nthread]);
   threads_out_tao = 0;
 #if defined(CRIT_PERF_SCHED)
   criticality=0;
@@ -46,6 +49,7 @@ PolyTask::PolyTask(int t, int _nthread=0) : type(t){
   // setting the hint to 0. can be overwritten by the constructor of the child class 
   workload_hint = 0;
 #endif
+  no_mold = false;
 }
                                           // Internally, GOTAO works only with queues, not stas
 int PolyTask::sta_to_queue(float x){
@@ -88,8 +92,13 @@ void PolyTask::history_mold(int _nthread, PolyTask *it){
   float shortest_exec = 1000.0f;
   float comp_perf = 0.0f; 
   auto&& partitions = inclusive_partitions[_nthread];
-  //if(rand()%10 != 0) { 
-  if(true) { 
+  if(it->no_mold) {
+    it->leader = _nthread; 
+    it->width  = 1;
+    return;
+  }
+  if(rand()%10 != 0) { 
+  //if(true) { 
   
     for(auto&& elem : partitions) {
       int leader = elem.first;

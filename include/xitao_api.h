@@ -42,6 +42,9 @@ void gotao_start();
 void gotao_fini();
 #define goTAO_push gotao_push
 
+#define xitao_wait_tasks gotao_wait();
+void gotao_wait();
+
 /*! Push work into Polytask queue. if no particular queue is specified then try to determine which is the local. 
  queue and insert it there. This has some overhead, so in general the
  programmer should specify some queue

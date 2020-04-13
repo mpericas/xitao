@@ -30,7 +30,7 @@ typedef void (*task)(void *, int);
 // classes. The sleeping barrier is used by TAO to synchronize the start of assemblies
 class AssemblyTask: public PolyTask{
 public:
-  AssemblyTask(int w, int nthread=0) : PolyTask(TASK_ASSEMBLY, nthread) {
+  AssemblyTask(int w, bool increment_pool = true, int nthread=0) : PolyTask(TASK_ASSEMBLY, increment_pool, nthread) {
     leader = -1;
     width = w;
 #ifdef NEED_BARRIER
@@ -50,7 +50,7 @@ public:
 
 class SimpleTask: public PolyTask{
 public:
-  SimpleTask(task fn, void *a, int nthread=0) : PolyTask(TASK_SIMPLE, nthread), args(a), f(fn){ 
+  SimpleTask(task fn, void *a, bool increment_task_pool = true, int nthread=0) : PolyTask(TASK_SIMPLE, increment_task_pool, nthread), args(a), f(fn){ 
     width = 1; 
   }
   void *args;
