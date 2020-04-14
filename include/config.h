@@ -2,14 +2,14 @@
 #define _CONFIG_H
 
 //#define DEBUG
-#define TRACK_STA
-#define MEASURE_IDLENESS
+//#define TRACK_STA
+//#define MEASURE_IDLENESS
 #define GOTAO_THREAD_BASE 0
 #define GOTAO_NO_AFFINITY (1.0)
 #define STEAL_ATTEMPTS 100
-#define TASK_POOL 100
+#define TASK_POOL 1000
 #define TAO_STA 1
-#define XITAO_MAXTHREADS 20
+#define XITAO_MAXTHREADS 8
 
 #define L1_W   1
 #define L2_W   2
