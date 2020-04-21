@@ -1,7 +1,8 @@
 #!/bin/bash
 export XITAO_STEALING_FREQ=2000
-CC=gcc
-CXX=g++
+module load intel 
+CC=icc
+CXX=icpc
 rm heat-tao heat-tao-rwss heat-tao-numa*
 
 ## RWSS ##
