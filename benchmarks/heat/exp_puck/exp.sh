@@ -29,3 +29,8 @@ echo "NUMA-Auto-Mold-1-2-6"
 echo "****************************************************************************************************"
 export XITAO_LAYOUT_PATH=${XITAO_PTT_PATH}/ptt_layout_1_2_6
 TAO_NOPLOT=1 AWIDTH=6 EXDECOMP=8 EYDECOMP=6 IXDECOMP=6 IYDECOMP=1 numactl -i all ../heat-tao-numa-auto ${INPUTFILE}
+echo "****************************************************************************************************"
+echo "NUMA-Auto-Mold-1-2-6"
+echo "****************************************************************************************************"
+export XITAO_LAYOUT_PATH=${XITAO_PTT_PATH}/ptt_layout_1_2
+TAO_NOPLOT=1 AWIDTH=6 EXDECOMP=8 EYDECOMP=6 IXDECOMP=6 IYDECOMP=1 numactl -i all ../heat-tao-numa-auto ${INPUTFILE}
