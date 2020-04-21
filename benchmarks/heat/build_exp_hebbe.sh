@@ -1,5 +1,5 @@
 #!/bin/bash
-export XITAO_STEALING_FREQ=2000
+export XITAO_STEALING_FREQ=100
 module load intel 
 CC=icc
 CXX=icpc
