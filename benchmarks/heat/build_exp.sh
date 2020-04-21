@@ -8,7 +8,7 @@ cd ../../
 cp makefile.sched.rwss makefile.sched
 CXX=${CXX} CC=${CC} make lib
 cd benchmarks/heat/
-make clean; make 
+make clean; CXX=${CXX} CC=${CC} make 
 cp heat-tao heat-tao-rwss
 
 
@@ -17,7 +17,7 @@ cd ../../
 cp makefile.sched.numa makefile.sched
 CXX=${CXX} CC=${CC} make lib
 cd benchmarks/heat/
-make clean; make 
+make clean; CXX=${CXX} CC=${CC} make 
 cp heat-tao heat-tao-numa
 
 
@@ -26,7 +26,7 @@ cd ../../
 cp makefile.sched.numa.auto makefile.sched
 CXX=${CXX} CC=${CC} make lib
 cd benchmarks/heat/
-make clean; make 
+make clean; CXX=${CXX} CC=${CC} make 
 cp heat-tao heat-tao-numa-auto
 
 
@@ -35,6 +35,6 @@ cd ../../
 cp makefile.sched.numa.auto.sta.track makefile.sched
 CXX=${CXX} CC=${CC} make lib
 cd benchmarks/heat/
-make clean; make 
+make clean; CXX=${CXX} CC=${CC} make 
 cp heat-tao heat-tao-numa-auto-sta-track
 
