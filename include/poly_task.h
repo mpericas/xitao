@@ -102,7 +102,7 @@ public:
   //! get the current STA address of a TAO
   float get_sta();
   //! copy the STA of a TAO to the current TAO
-  int clone_sta(PolyTask *pt);
+  float clone_sta(PolyTask *pt);
   //! create a dependency to another TAO
   /*!
     \param t a TAO with which a happens-before order needs to be ensured (TAO t should execute after *this) 

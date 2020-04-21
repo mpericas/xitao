@@ -47,6 +47,7 @@ void usage( char *s )
 
 int main( int argc, char *argv[] )
 {
+    const float sta_precision = 100.0f;
     int thread_base; int nthreads; 
     unsigned iter;
     FILE *infile, *resfile;
@@ -209,7 +210,7 @@ int main( int argc, char *argv[] )
           auto sta_val = (float) (x * eydecomp + y) / (float) (exdecomp*eydecomp);
           
           init1[x][y]->set_sta(sta_val);
-          init1[x][y]->workload_hint = (int)(sta_val * 100000.0f);
+          init1[x][y]->workload_hint = (int)(sta_val * sta_precision);
           //std::cout << init1[x][y]->workload_hint << std::endl;
           gotao_push(init1[x][y]); // insert into affinity queue
        }
@@ -235,7 +236,7 @@ int main( int argc, char *argv[] )
                              ceildiv(np, ixdecomp*exdecomp), // (np + ixdecomp*exdecomp -1) / (ixdecomp*exdecomp),
                              ceildiv(np, iydecomp*eydecomp), //(np + iydecomp*eydecomp -1) / (iydecomp*eydecomp), 
                              awidth);
-          init2[x][y]->workload_hint = init2[x][y]->clone_sta(init1[x][y]);
+          init2[x][y]->workload_hint = int(init2[x][y]->clone_sta(init1[x][y]) * sta_precision);
           init1[x][y]->make_edge(init2[x][y]);
        }
     // when not using NUMA allocation, we do not need to run any of this code since both u and uhelp are already initialized
@@ -259,7 +260,7 @@ int main( int argc, char *argv[] )
                              awidth);
 
 #ifdef NUMA_ALLOC
-          stc[iter][x][y]->workload_hint = stc[iter][x][y]->clone_sta(init2[x][y]);
+          stc[iter][x][y]->workload_hint = int(stc[iter][x][y]->clone_sta(init2[x][y]) * sta_precision);
           init2[x][y]->make_edge(stc[iter][x][y]);
 
           if((x-1)>=0)       init2[x-1][y]->make_edge(stc[iter][x][y]);
@@ -271,7 +272,7 @@ int main( int argc, char *argv[] )
           auto sta_val = (float) (x * eydecomp + y) / (float) (exdecomp*eydecomp);
           std::cout << sta_val << std::endl;
           stc[iter][x][y]->set_sta(sta_val);
-          stc[iter][x][y]->workload_hint = (int) (sta_val * 100000.0f);
+          stc[iter][x][y]->workload_hint = (int) (sta_val * sta_precision);
 #else // no topo
           stc[iter][x][y]->set_sta(0.0);
 #endif  // TOPOPLACE
@@ -304,7 +305,7 @@ int main( int argc, char *argv[] )
 
 // this should ensure that we do not overwrite data which has not yet been fully processed
 // necessary because we do not do renaming
-          cpb[iter][x][y]->workload_hint = cpb[iter][x][y]->clone_sta(stc[iter][x][y]);
+          cpb[iter][x][y]->workload_hint = int(cpb[iter][x][y]->clone_sta(stc[iter][x][y]) * sta_precision);
           stc[iter][x][y]->make_edge(cpb[iter][x][y]);
           
           cpb[iter][x][y]->criticality = 0; 
@@ -333,7 +334,7 @@ int main( int argc, char *argv[] )
                              ceildiv(np, ixdecomp*exdecomp), // (np + ixdecomp*exdecomp -1) / (ixdecomp*exdecomp),
                              ceildiv(np, iydecomp*eydecomp), //(np + iydecomp*eydecomp -1) / (iydecomp*eydecomp), 
                              awidth);
-          stc[iter][x][y]->workload_hint = stc[iter][x][y]->clone_sta(cpb[iter-1][x][y]);
+          stc[iter][x][y]->workload_hint = int(stc[iter][x][y]->clone_sta(cpb[iter-1][x][y]) * sta_precision);
           stc[iter][x][y]->clone_sta(cpb[iter-1][x][y]);
           cpb[iter-1][x][y]->make_edge(stc[iter][x][y]);
           cpb[iter-1][x][y]->criticality = 0; 
@@ -365,7 +366,7 @@ int main( int argc, char *argv[] )
 
 // this should ensure that we do not overwrite data which has not yet been fully processed
 // necessary because we do not do renaming
-          cpb[iter][x][y]->workload_hint = cpb[iter][x][y]->clone_sta(stc[iter][x][y]);
+          cpb[iter][x][y]->workload_hint = int(cpb[iter][x][y]->clone_sta(stc[iter][x][y]) * sta_precision);
           stc[iter][x][y]->make_edge(cpb[iter][x][y]);
           
 

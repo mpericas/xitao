@@ -66,11 +66,12 @@ int PolyTask::set_sta(float x){
 } 
 float PolyTask::get_sta(){             // return sta value
   return affinity_relative_index; 
-}    
-int PolyTask::clone_sta(PolyTask *pt) { 
+}   
+
+float PolyTask::clone_sta(PolyTask *pt) { 
   affinity_relative_index = pt->affinity_relative_index;    
   affinity_queue = pt->affinity_queue; // make sure to copy the exact queue
-  return int(affinity_relative_index * 100000.0f);
+  return affinity_relative_index;
 }
 void PolyTask::make_edge(PolyTask *t){
   out.push_back(t);
