@@ -1,5 +1,5 @@
-CC = gcc 
-CXX = g++
+#CC = gcc 
+#CXX = g++
 
 DEBUG=0 
 
