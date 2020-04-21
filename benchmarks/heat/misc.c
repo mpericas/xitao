@@ -17,7 +17,7 @@
 #include <float.h>
 #include <sys/time.h>
 #include <malloc.h>
-
+#include <limits.h>
 #include "heat.h"
 
 /*
