@@ -246,6 +246,7 @@ bool PolyTask::has_better_partition(int thread_a, int thread_b){
   // auto ptt_val2 = this->get_timetable(thread_b, 0);
   // if(ptt_val1 < ptt_val2) return true;
   // return false;
+  if(rand()%10 == 0) return true; 
   float shortest_exec = 1000.0f;
   float comp_perf = 0.0f; 
   auto&& partitions_a = inclusive_partitions[thread_a];
