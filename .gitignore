@@ -1,3 +1,5 @@
+benchmarks/fmm2d/fmm_*
+benchmarks/fmm2d/kernel
 randombench
 synbench
 dotprod
