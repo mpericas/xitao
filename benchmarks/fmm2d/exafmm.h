@@ -54,6 +54,9 @@ namespace exafmm {
   real_t theta;                                                 //!< Multipole acceptance criterion
   real_t dX[2];                                                 //!< Distance vector
   Box bounds;                                                   //!< Declare the bounding box
+#if NUMA_AWARE
+  int numa_count;
+#endif
 #pragma omp threadprivate(dX)                                   //!< Make global variables private
 }
 

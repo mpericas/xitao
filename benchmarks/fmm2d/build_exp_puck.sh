@@ -14,12 +14,12 @@ cp fmm-xitao fmm-xitao-rwss
 
 
 ## NUMA ##
-# cd ../../
-# cp makefile.sched.numa makefile.sched
-# CXX=${CXX} CC=${CC} make lib
-# cd benchmarks/fmm2d/
-# make clean; CXX=${CXX} CC=${CC} make 
-# cp fmm-xitao fmm-xitao-numa
+cd ../../
+cp makefile.sched.numa makefile.sched
+CXX=${CXX} CC=${CC} make lib
+cd benchmarks/fmm2d/
+make clean; CXX=${CXX} CC=${CC} CPPFLAGS=-DNUMA_AWARE make 
+cp fmm-xitao fmm-xitao-numa
 
 
 ## NUMA Auto ##

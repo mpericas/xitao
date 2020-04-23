@@ -2,11 +2,17 @@
 #include "kernel.h"
 #include "timer.h"
 #include "traverse.h"
+#if NUMA_AWARE
+#include "numa_utils.h"
+#endif
 using namespace exafmm;
 
 int main(int argc, char ** argv) {
   const int numBodies = (argc > 1)? atoi(argv[1]) : 10000;      // Number of bodies
   const int timeSteps = (argc > 2)? atoi(argv[2]) : 1;          // Number of iterations
+#if NUMA_AWARE 
+  numa_count = getNUMACount();                                  // Get Count of NUMA nodes
+#endif  
   P = 10;                                                       // Order of expansions
   ncrit = 8;                                                    // Number of bodies per leaf cell
   theta = 0.4;                                                  // Multipole acceptance criterion

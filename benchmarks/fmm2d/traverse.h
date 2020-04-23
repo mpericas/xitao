@@ -5,6 +5,9 @@
 #include <assert.h>
 #ifdef USE_XITAO
 #include "xitao.h"
+#ifdef NUMA_AWARE
+#include "numa_utils.h"
+#endif
 namespace exafmm { 
 
   class upward_pass: public AssemblyTask { 
@@ -64,6 +67,10 @@ namespace exafmm {
                 horizontalPass_TAO* tao = new horizontalPass_TAO(ci, Cj, true);
 #if STA_AWARE_STEALING
                 tao->workload_hint = Cj->STA;
+#endif
+#if NUMA_AWARE
+                std::cout << "NUMA Node" << getRelativeAddress(Cj, numa_count) << std::endl;
+
 #endif
                 gotao_push(tao, rand()%gotao_nthreads);
               }
