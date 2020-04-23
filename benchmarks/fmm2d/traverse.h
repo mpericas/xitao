@@ -70,8 +70,10 @@ namespace exafmm {
 #endif
 #if NUMA_AWARE
                 tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
-#endif
+                gotao_push(tao);
+#else 
                 gotao_push(tao, rand()%gotao_nthreads);
+#endif
               }
               else {
                 horizontalPass_TAO* tao = new horizontalPass_TAO(ci, Cj, false);
