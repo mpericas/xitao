@@ -1,7 +1,7 @@
 XITAO_HOME=../..
 include ${XITAO_HOME}/makefile.sched
 #CXX = g++ 
-CPPFLAGS+= -g -O3 -Wall -Wfatal-errors -fopenmp  
+CPPFLAGS+= -g -O3 -std=c++11 -Wall -Wfatal-errors -fopenmp  
 
 all:
 	@make kernel
