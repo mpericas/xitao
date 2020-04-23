@@ -14,7 +14,7 @@ kernel: kernel.cxx
 	./kernel 30
 
 fmm-xitao: fmm.cxx
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I${XITAO_HOME}/include $? -o $@ -L${XITAO_HOME}/lib -lnuma -lxitao -DUSE_XITAO
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DUSE_XITAO -I${XITAO_HOME}/include $? -o $@ -L${XITAO_HOME}/lib -lxitao ${LDFLAGS}
 
 fmm-omp:$(CXX) $(CPPFLAGS) $? -o fmm-omp 
 

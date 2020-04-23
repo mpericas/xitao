@@ -18,7 +18,7 @@ cd ../../
 cp makefile.sched.numa makefile.sched
 CXX=${CXX} CC=${CC} make lib
 cd benchmarks/fmm2d/
-make clean; CXX=${CXX} CC=${CC} CPPFLAGS=-DNUMA_AWARE make 
+make clean; CXX=${CXX} CC=${CC} CPPFLAGS=-DNUMA_AWARE LDFLAGS=-lnuma make 
 cp fmm-xitao fmm-xitao-numa
 
 

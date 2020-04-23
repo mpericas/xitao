@@ -7,7 +7,6 @@ else
 $(warning XITAO_STEALING_FREQ is not set. Setting it to 100)
 CXXFLAGS+=-DSTEAL_ATTEMPTS=100
 endif
-CXXFLAGS+=-DTRACK_STA
 
 # Homogenous Scheduling 
 #CXXFLAGS+=-DBASIC_SCHED

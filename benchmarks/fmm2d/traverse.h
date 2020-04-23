@@ -69,8 +69,7 @@ namespace exafmm {
                 tao->workload_hint = Cj->STA;
 #endif
 #if NUMA_AWARE
-                std::cout << "NUMA Node" << getRelativeAddress(Cj, numa_count) << std::endl;
-
+                tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
 #endif
                 gotao_push(tao, rand()%gotao_nthreads);
               }
