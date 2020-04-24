@@ -2,7 +2,7 @@
 export XITAO_STEALING_FREQ=5000
 CC=gcc
 CXX=g++
-rm fmm-xitao fmm-xitao-rwss fmm-xitao-numa*
+rm fmm-xitao fmm-xitao-rwss fmm-xitao-numa-auto fmm-xitao-numa-auto-sta-track
 
 ## RWSS ##
 cd ../../
