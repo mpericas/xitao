@@ -72,7 +72,7 @@ namespace exafmm {
                 tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
                 gotao_push(tao);
 #else 
-                gotao_push(tao, rand()%gotao_nthreads);
+                gotao_push(tao, (nthread+1)%gotao_nthreads);
 #endif
               }
               else {
