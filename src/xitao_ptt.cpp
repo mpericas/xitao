@@ -9,7 +9,6 @@ ptt_shared_type xitao_ptt::try_insert_table(PolyTask* pt, size_t const& workload
 
   // the PTT table 
   ptt_shared_type _ptt;
-  LOCK_ACQUIRE(output_lck);   
   // check if entry is new
   if(runtime_ptt_tables.find(tao_info) == runtime_ptt_tables.end()) {
     // allocate the ptt table and place it in shared pointer
@@ -21,7 +20,6 @@ ptt_shared_type xitao_ptt::try_insert_table(PolyTask* pt, size_t const& workload
     _ptt = runtime_ptt_tables[tao_info];
 
   } 
-  LOCK_RELEASE(output_lck);
   // return the newly created or existing ptt table
   return _ptt;
 }
