@@ -43,58 +43,58 @@ namespace exafmm {
     gotao_start();
     gotao_fini();
   }
-
+  
+  void horizontalPass(Cell * Ci, Cell * Cj, int nthread);
+  
   class horizontalPass_TAO : public AssemblyTask {
   public:
     Cell* Ci;
     Cell* Cj;
-    bool spawn_task;
-    horizontalPass_TAO(Cell* _ci, Cell* _cj, bool _spawn) : AssemblyTask(1, _spawn), Ci(_ci), Cj(_cj), spawn_task(_spawn) {
+    horizontalPass_TAO(Cell* _ci, Cell* _cj) : AssemblyTask(1), Ci(_ci), Cj(_cj){
       //no_mold = true;
     }
     void execute(int nthread) {
-      if(spawn_task && nthread != leader) return;
-      for (int d=0; d<2; d++) dX[d] = Ci->X[d] - Cj->X[d];        // Distance vector from source to target
-        real_t R2 = norm(dX) * theta * theta;                       // Scalar distance squared
-        if (R2 > (Ci->R + Cj->R) * (Ci->R + Cj->R)) {               // If distance is far enough
-          M2L(Ci, Cj);
-        } else if (Ci->NCHILD == 0 && Cj->NCHILD == 0) {            // Else if both cells are leafs
-          P2P(Ci, Cj);
-        } else {
-          if (Cj->NCHILD == 0 || (Ci->R >= Cj->R && Ci->NCHILD != 0)) {// If Cj is leaf or Ci is larger                     
-            for (Cell * ci=Ci->CHILD; ci!=Ci->CHILD+Ci->NCHILD; ci++) {// Loop over Ci's children
-              if(ci->NBODY > 100){
-                horizontalPass_TAO* tao = new horizontalPass_TAO(ci, Cj, true);
-#if STA_AWARE_STEALING
-                tao->workload_hint = Cj->STA;
-#endif
-#if NUMA_AWARE
-                tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
-                gotao_push(tao);
-#else 
-                gotao_push(tao, (nthread+1)%gotao_nthreads);
-#endif
-              }
-              else {
-                horizontalPass_TAO* tao = new horizontalPass_TAO(ci, Cj, false);
-                tao->execute(nthread);
-              }
-
-            }                                                         //  End loop over Ci's children
-          } else {        
-            for (Cell * cj=Cj->CHILD; cj!=Cj->CHILD+Cj->NCHILD; cj++) {// Loop over Cj's children
-              horizontalPass_TAO* tao = new horizontalPass_TAO(Ci, cj, false);
-              tao->execute(nthread);
-            }                                                         //  End loop over Cj's children
-          }                                                           // End if for leafs and Ci Cj size
-      }
+      if(nthread != leader) return;
+      horizontalPass(Ci, Cj, nthread);
     }
     void cleanup() { }
   };
+  
+  //! Recursive call to dual tree traversal for horizontal pass
+  void horizontalPass(Cell * Ci, Cell * Cj, int nthread) {
+    for (int d=0; d<2; d++) dX[d] = Ci->X[d] - Cj->X[d];        // Distance vector from source to target
+    real_t R2 = norm(dX) * theta * theta;                       // Scalar distance squared
+    if (R2 > (Ci->R + Cj->R) * (Ci->R + Cj->R)) {               // If distance is far enough
+      M2L(Ci, Cj);                                              //  M2L kernel
+    } else if (Ci->NCHILD == 0 && Cj->NCHILD == 0) {            // Else if both cells are leafs
+      P2P(Ci, Cj);                                              //  P2P kernel
+    } else if (Cj->NCHILD == 0 || (Ci->R >= Cj->R && Ci->NCHILD != 0)) {// If Cj is leaf or Ci is larger
+      for (Cell * ci=Ci->CHILD; ci!=Ci->CHILD+Ci->NCHILD; ci++) {// Loop over Ci's children
+        if(ci->NBODY > 100){
+          horizontalPass_TAO* tao = new horizontalPass_TAO(ci, Cj);
+#if STA_AWARE_STEALING
+          tao->workload_hint = Cj->STA;
+#endif
+#if NUMA_AWARE
+          tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
+          gotao_push(tao);
+#else 
+          gotao_push(tao, (nthread+1)%gotao_nthreads);
+#endif
+        } else {
+          horizontalPass(ci, Cj, nthread);
+        }
+      }                                                         //  End loop over Ci's children
+    } else {                                                    // Else if Ci is leaf or Cj is larger
+      for (Cell * cj=Cj->CHILD; cj!=Cj->CHILD+Cj->NCHILD; cj++) {// Loop over Cj's children
+        horizontalPass(Ci, cj, nthread);                         //   Recursive call to source child cells
+      }                                                         //  End loop over Cj's children
+    }                                                           // End if for leafs and Ci Cj size
+  }
 
   void horizontalPass(Cells & icells, Cells & jcells) {
     gotao_init();
-    horizontalPass_TAO* parent = new horizontalPass_TAO(&icells[0], &jcells[0], true);
+    horizontalPass_TAO* parent = new horizontalPass_TAO(&icells[0], &jcells[0]);
     gotao_start(); 
     gotao_push(parent, 0);
     gotao_fini();
@@ -174,7 +174,7 @@ namespace exafmm {
         horizontalPass(Ci, cj);                                 //   Recursive call to source child cells
       }                                                         //  End loop over Cj's children
     }                                                           // End if for leafs and Ci Cj size
-#pragma omp taskwait                                            // Synchronize OpenMP tasks
+ #pragma omp taskwait                                            // Synchronize OpenMP tasks
   }
 
   //! Horizontal pass interface
