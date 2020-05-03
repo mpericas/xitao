@@ -78,7 +78,7 @@ private:
   int const _sched_type;
   IterType _start;
   IterType _end;
-  FuncType const& _spmd_region;  
+  FuncType _spmd_region;  
   IterType _block_size; 
   IterType _block_iter;
   IterType _blocks; 

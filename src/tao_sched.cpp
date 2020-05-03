@@ -209,6 +209,7 @@ void gotao_init_hw( int nthr, int thrb, int nhwc)
 // Initialize gotao from environment vars or defaults
 void gotao_init()
 {
+  //assert(PolyTask::pending_tasks == 0);
   gotao_init_hw(-1, -1, -1);
 }
 
