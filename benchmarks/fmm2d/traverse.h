@@ -163,8 +163,10 @@ namespace exafmm {
   std::set<size_t> visited_sta;
   for(size_t ind = 0; ind < icells.size(); ++ind) {
     auto current_sta = icells[ind].STA;
-    xitao_ptt::print_schedule_map<horizontalPass_TAO>(current_sta);
-    xitao_ptt::print_schedule_map<horizontalPassContinuation_TAO>(current_sta);
+    if(visited_sta.find(current_sta) == visited_sta.end()) {
+      xitao_ptt::print_schedule_map<horizontalPass_TAO>(current_sta);
+      xitao_ptt::print_schedule_map<horizontalPassContinuation_TAO>(current_sta);
+    }
   }
 #endif
   }
