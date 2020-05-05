@@ -6,6 +6,7 @@
 #ifdef USE_XITAO
 #include "xitao.h"
 #include <stack>
+#include <set>
 #ifdef NUMA_AWARE
 #include "numa_utils.h"
 #endif
@@ -158,6 +159,14 @@ namespace exafmm {
     horizontalPass_TAO* parent = new horizontalPass_TAO(&icells[0], &jcells[0]);
     gotao_push(parent, 0);
     gotao_fini();
+#ifdef TRACK_STA
+  std::set<size_t> visited_sta;
+  for(size_t ind = 0; ind < icells.size(); ++ind) {
+    auto current_sta = icells[ind].STA;
+    xitao_ptt::print_schedule_map<horizontalPass_TAO>(current_sta);
+    xitao_ptt::print_schedule_map<horizontalPassContinuation_TAO>(current_sta);
+  }
+#endif
   }
 #endif
 #else
