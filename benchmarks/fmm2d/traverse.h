@@ -132,7 +132,7 @@ namespace exafmm {
           tao->workload_hint = Cj->STA;
 #endif
 #if NUMA_AWARE
-          tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
+          tao->set_sta(getRelativeAddress(ci, numa_count, gotao_nthreads));
 #endif
         } else {
           recursive_stack->emplace(std::make_pair(ci, Cj));
