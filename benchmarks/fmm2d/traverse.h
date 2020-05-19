@@ -3,6 +3,7 @@
 #include "exafmm.h"
 #include "hilbert.h"
 #include <assert.h>
+#include <set>
 #ifdef USE_XITAO
 #include "xitao.h"
 #ifdef NUMA_AWARE
@@ -69,7 +70,7 @@ namespace exafmm {
                 tao->workload_hint = Cj->STA;
 #endif
 #if NUMA_AWARE
-                tao->set_sta(getRelativeAddress(Cj, numa_count, gotao_nthreads));
+                tao->set_sta(getRelativeAddress(Cj->BODY, numa_count, gotao_nthreads));
                 gotao_push(tao);
 #else 
                 gotao_push(tao, (nthread+1)%gotao_nthreads);
@@ -98,6 +99,18 @@ namespace exafmm {
     gotao_start(); 
     gotao_push(parent, 0);
     gotao_fini();
+#ifdef TRACK_STA
+  std::set<size_t> visited_sta;
+  for(size_t ind = 0; ind < icells.size(); ++ind) {
+    auto current_sta = icells[ind].STA;
+    if(visited_sta.find(current_sta) == visited_sta.end()) {
+      xitao_ptt::print_schedule_map<horizontalPass_TAO>(current_sta);
+      //xitao_ptt::print_schedule_map<horizontalPassContinuation_TAO>(current_sta);
+    }
+    visited_sta.insert(current_sta);
+  }
+#endif
+
   }
 
   class downwardPass_TAO : public AssemblyTask {
