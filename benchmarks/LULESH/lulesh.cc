@@ -2059,7 +2059,7 @@ void CalcEnergyForElems(Real_t* p_new, Real_t* e_new, Real_t* q_new,
 //	   << xitao_vec_dynamic << " "
 //	   << block_length << " "
 //	   << std::endl; 
-   __xitao_vec_multiparallel_region(4, i, length, xitao_vec_dynamic, block_length,
+   auto unusued = __xitao_vec_multiparallel_region(4, i, length, xitao_vec_dynamic, block_length,
 
   // for (Index_t i = 0 ; i < length ; ++i) 
    {
@@ -2682,7 +2682,7 @@ int main(int argc, char *argv[])
 #ifdef XITAO
 
     gotao_init();  // default initialization, threads will sleep
-    gotao_start(); // allow threads to get out of loop
+  //  gotao_start(); // allow threads to get out of loop
 
 #endif  
 
