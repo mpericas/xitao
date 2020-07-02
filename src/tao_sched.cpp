@@ -209,6 +209,7 @@ void gotao_init_hw( int nthr, int thrb, int nhwc)
 // Initialize gotao from environment vars or defaults
 void gotao_init()
 {
+  //assert(PolyTask::pending_tasks == 0);
   gotao_init_hw(-1, -1, -1);
 }
 
@@ -555,6 +556,7 @@ int worker_loop(int nthread)
       auto total_thread_time = elapsed_seconds.count();
       LOCK_ACQUIRE(output_lck);
       std::cout << nthread << "," <<  total_thread_time - work_time << "," << work_time << std::endl; 
+      if(nthread == 0) std::cout << "total steals: " << tao_total_steals << std::endl; 
       LOCK_RELEASE(output_lck);
 #endif
       break;
