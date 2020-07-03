@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
   uint32_t elem_count = dim_size * dim_size;
   // vector<MatMulTAO*> matmulTAOs(matmul_counter);
   // vector<StreamTAO*> streamTAOs(stream_counter);
-  
+  gotao_init();
   vector<AssemblyTask*> headTAOs;
   bool toggle = false;
   for(int j = 0; j < dop; j+=resource_width) { 
@@ -92,7 +92,6 @@ int main(int argc, char *argv[]) {
     buildDAG(tao, critical_path, {tao->A, tao->B, tao->C} ,dim_size, resource_width, 0, depth, false);
   }
   int curr_leader = 0;
-  gotao_init();
   for(int i = 0; i < headTAOs.size(); ++i) { 
     gotao_push(headTAOs[i]);
     curr_leader += resource_width;
