@@ -21,6 +21,7 @@ void buildCriticalPath(AssemblyTask* current, vector<AssemblyTask*>& path, vecto
     } else {
       next = new StreamTAO(dim, wid, data[2]);
     }
+    next->clone_sta(current);
     path.push_back(next);
     current->make_edge(next);
     buildCriticalPath(next, path, data, dim, wid, current_depth, depth, !toggle);
@@ -36,6 +37,7 @@ void buildDAG(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*
     } else {
       next = new StreamTAO(dim, wid, data[2]);
     }
+    next->clone_sta(current);
     //path.push_back(next);
     assert(path.size() > current_depth);
     current->make_edge(path[current_depth]);
