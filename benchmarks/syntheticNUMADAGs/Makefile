@@ -22,7 +22,7 @@ chains: $(CHAINS_OBJS)
 	$(CXX) $^ -o $@ ${LIBS}
 
 run: all 
-	./numabench 64 4 5000 1000 4
+	./numabench 64 1 8 1000 1 
 
 clean:
 	rm -rf numabench $(SYNTH_OBJS)  graph.txt 
