@@ -69,6 +69,13 @@ int main(int argc, char *argv[]) {
   int matmul_counter = depth * (dop / resource_width) / 2;
   int stream_counter = depth * (dop / resource_width) / 2; 
   uint32_t elem_count = dim_size * dim_size;
+  
+  std::cout << "Dim size: " << dim_size << std::endl;
+  std::cout << "Resource width: " << resource_width << std::endl;
+  std::cout << "Degree of Parallelism: " << dop << std::endl;
+  std::cout << "Depth: " << depth << std::endl;
+  std::cout << "Is fixed width: " << is_fixed_width << std::endl;
+
   // vector<MatMulTAO*> matmulTAOs(matmul_counter);
   // vector<StreamTAO*> streamTAOs(stream_counter);
   gotao_init();
