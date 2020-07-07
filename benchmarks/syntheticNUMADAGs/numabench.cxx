@@ -12,7 +12,9 @@
 #include <assert.h>
 using namespace xitao;
 using namespace std;
-
+const float sta_precision = 100.0f;
+const int numa_group = 6;
+vector<float> sta_list; 
 void buildCriticalPath(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*> data, int dim, int wid, int current_depth, int depth, bool toggle) {
   AssemblyTask* next;
   if(++current_depth < depth) {
@@ -22,6 +24,7 @@ void buildCriticalPath(AssemblyTask* current, vector<AssemblyTask*>& path, vecto
     } else {
       next = new StreamTAO(dim, wid, data[2]);
     }
+    next->workload_hint = current->workload_hint;
     next->clone_sta(current);
     path.push_back(next);
     current->make_edge(next);
@@ -38,6 +41,7 @@ void buildDAG(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*
     } else {
       next = new StreamTAO(dim, wid, data[2]);
     }
+    next->workload_hint = current->workload_hint;
     next->clone_sta(current);
     //path.push_back(next);
     assert(path.size() > current_depth);
@@ -84,6 +88,7 @@ int main(int argc, char *argv[]) {
   bool toggle = false;
   for(int j = 0; j < dop; j+=resource_width) { 
     InitTAO* tao = new InitTAO(dim_size, resource_width);
+    tao->workload_hint = j / numa_group;
     tao->set_sta(j / float(dop));
     headTAOs.push_back(tao);
   }

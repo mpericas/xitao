@@ -226,7 +226,7 @@ void gotao_fini()
   gotao_can_exit = true;
   gotao_started = false;
   //gotao_initialized = false;
-  tao_total_steals = 0;  
+  //tao_total_steals = 0;  
   for(int i = 0; i < gotao_nthreads; i++){
     t[i]->join();
   }
