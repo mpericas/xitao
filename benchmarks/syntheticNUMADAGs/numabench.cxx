@@ -45,7 +45,7 @@ void buildDAG(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*
     next->clone_sta(current);
     //path.push_back(next);
     assert(path.size() > current_depth);
-    current->make_edge(path[current_depth]);
+    //current->make_edge(path[current_depth]);
     path[current_depth]->make_edge(next);
     buildCriticalPath(next, path, data, dim, wid, current_depth, depth, !toggle);
   }
