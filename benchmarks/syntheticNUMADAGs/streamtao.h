@@ -40,7 +40,10 @@ public:
       int row_block_end   = (row_block_id + 1) * block_size;
       int end = (_dim < row_block_end) ? _dim : row_block_end; 
       for (int i = row_block_start; i < end; ++i) { 
-         std::copy(input + (i * _dim), input + (i * _dim) + _dim, output + i * _dim);
+        for(int j = 0; j < _dim; ++j) {
+          output[i + j] = input[i + j];
+         // std::copy(input + (i * _dim), input + (i * _dim) + _dim, output + i * _dim);
+        }
       }
     }
   }
