@@ -1,5 +1,6 @@
 #include "matmultao.h"
 #include "streamtao.h"
+#include "inittao.h"
 #include <vector>
 #include <chrono>
 #include <fstream>
@@ -82,28 +83,24 @@ int main(int argc, char *argv[]) {
   vector<AssemblyTask*> headTAOs;
   bool toggle = false;
   for(int j = 0; j < dop; j+=resource_width) { 
-    real_t* A = new real_t[elem_count];
-    real_t* B = new real_t[elem_count];
-    MatMulTAO* tao = new MatMulTAO(dim_size, resource_width, A, B);
+    InitTAO* tao = new InitTAO(dim_size, resource_width);
     tao->set_sta(j / float(dop));
     headTAOs.push_back(tao);
   }
   // build critical path
-  MatMulTAO* tao = dynamic_cast<MatMulTAO*>(headTAOs[0]);
+  InitTAO* tao = dynamic_cast<InitTAO*>(headTAOs[0]);
   assert(tao != NULL);
   vector<AssemblyTask*> critical_path;
   critical_path.push_back(tao);
   buildCriticalPath(tao, critical_path, {tao->A, tao->B, tao->C} ,dim_size, resource_width, 0, depth, false);
   
   for(int i = 1; i < headTAOs.size(); ++i) {
-    MatMulTAO* tao = dynamic_cast<MatMulTAO*>(headTAOs[i]);
+    InitTAO* tao = dynamic_cast<InitTAO*>(headTAOs[i]);
     assert(tao != NULL);
     buildDAG(tao, critical_path, {tao->A, tao->B, tao->C} ,dim_size, resource_width, 0, depth, false);
   }
-  int curr_leader = 0;
   for(int i = 0; i < headTAOs.size(); ++i) { 
     gotao_push(headTAOs[i]);
-    curr_leader += resource_width;
   }
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
