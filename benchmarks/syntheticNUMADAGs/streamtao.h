@@ -31,14 +31,16 @@ public:
 
   // this assembly can work totally asynchronously
   void execute(int threadid) {
+    int _dim = dim_size;
+    int _block_count = block_count;
     while(true) {
       int row_block_id = block_index++;
-      if(row_block_id > block_count) return;
+      if(row_block_id > _block_count) return;
       int row_block_start =  row_block_id      * block_size;
       int row_block_end   = (row_block_id + 1) * block_size;
-      int end = (dim_size < row_block_end) ? dim_size : row_block_end; 
+      int end = (_dim < row_block_end) ? _dim : row_block_end; 
       for (int i = row_block_start; i < end; ++i) { 
-         std::copy(input + (i * dim_size), input + (i * dim_size) + dim_size, output + i * dim_size);
+         std::copy(input + (i * _dim), input + (i * _dim) + _dim, output + i * _dim);
       }
     }
   }

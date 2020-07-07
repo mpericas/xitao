@@ -34,17 +34,19 @@ public:
 
   // this assembly can work totally asynchronously
   void execute(int threadid) {
+    int _dim = dim_size;
+    int _block_count = block_count;
     while(true) {
       int row_block_id = block_index++;
-      if(row_block_id > block_count) return;
+      if(row_block_id > _block_count) return;
       // assume B is transposed, so that you can utilize the performance of transposed matmul 
-      for (int i = row_block_id * block_size; i < dim_size && i < ((row_block_id + 1 ) * block_size); ++i) { 
-        for (int j = 0; j < dim_size; j++) {
+      for (int i = row_block_id * block_size; i < _dim && i < ((row_block_id + 1 ) * block_size); ++i) { 
+        for (int j = 0; j < _dim; j++) {
           real_t res  = 0;
-          for (int k = 0; k < dim_size; k++) {
-            res += A[i*dim_size+k]*B[j*dim_size+k];
+          for (int k = 0; k < _dim; k++) {
+            res += A[i*_dim+k]*B[j*_dim+k];
           }
-          C[i*dim_size+j] = res;
+          C[i*_dim+j] = res;
         }
       }
     }
