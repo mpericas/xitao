@@ -93,7 +93,6 @@ int main(int argc, char *argv[]) {
   vector<AssemblyTask*> critical_path;
   critical_path.push_back(tao);
   buildCriticalPath(tao, critical_path, {tao->A, tao->B, tao->C} ,dim_size, resource_width, 0, depth, false);
-  bool toggle = false;
   for(int i = 1; i < headTAOs.size(); ++i) {
     InitTAO* tao = dynamic_cast<InitTAO*>(headTAOs[i]);
     assert(tao != NULL);
