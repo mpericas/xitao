@@ -1,6 +1,7 @@
 #include "matmultao.h"
 #include "streamtao.h"
 #include "inittao.h"
+#include "triadtao.h"
 #include <vector>
 #include <chrono>
 #include <fstream>
@@ -14,35 +15,54 @@ using namespace xitao;
 using namespace std;
 const float sta_precision = 100.0f;
 const int numa_group = 6;
+const int numa_count = 48;
 vector<float> sta_list; 
 void buildCriticalPath(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*> data, int dim, int wid, int current_depth, int depth, bool toggle) {
   AssemblyTask* next;
   if(++current_depth < depth) {
-    if(toggle) {
-      next = new MatMulTAO(dim, wid, data[0], data[1]);
-      data[2] = ((MatMulTAO*)next)->C;
-    } else {
+    //if(toggle) {
+   //   next = new MatMulTAO(dim, wid, data[0], data[1]);
+    //  data[2] = ((MatMulTAO*)next)->C;
+  //  } else {
       next = new StreamTAO(dim, wid, data[2]);
-    }
+      data[2] = ((StreamTAO*)next)->output;
+   // }
+#ifndef NO_STA
     next->workload_hint = current->workload_hint;
     next->clone_sta(current);
+#endif
     path.push_back(next);
     current->make_edge(next);
     buildCriticalPath(next, path, data, dim, wid, current_depth, depth, !toggle);
   }
 }
 
-void buildDAG(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*> data, int dim, int wid, int current_depth, int depth, bool toggle) {
+void buildDAG(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*> data, int dim, int wid, int current_depth, int depth, int compute_mode, bool toggle) {
   AssemblyTask* next;
   if(++current_depth < depth) {
-    if(toggle) {
-      next = new MatMulTAO(dim, wid, data[0], data[1]);
-      data[2] = ((MatMulTAO*)next)->C;
-    } else {
+   if(compute_mode == 2) {
+     if(toggle) {
+        next = new MatMulTAO(dim, wid, data[0], data[2]);
+        data[2] = ((MatMulTAO*)next)->C;
+        //next = new TriadTAO(dim, wid, data[2]);
+        //data[2] = ((TriadTAO*)next)->output;
+      } else {
+        next = new TriadTAO(dim, wid, data[2]);
+        //next = new StreamTAO(dim, wid, data[2]);
+        data[2] = ((TriadTAO*)next)->output;
+      }
+    } else if (compute_mode == 1) { 
       next = new StreamTAO(dim, wid, data[2]);
+      data[2] = ((StreamTAO*)next)->output;
+    } else {
+      next = new MatMulTAO(dim, wid, data[0], data[2]);
+      data[2] = ((MatMulTAO*)next)->C;
     }
+#ifndef NO_STA
     next->workload_hint = current->workload_hint;
+    assert(next->workload_hint < 8 && next->workload_hint >= 0); 
     next->clone_sta(current);
+#endif
     //path.push_back(next);
     assert(path.size() > current_depth);
     //current->make_edge(path[current_depth]);
@@ -52,8 +72,8 @@ void buildDAG(AssemblyTask* current, vector<AssemblyTask*>& path, vector<real_t*
 }
 
 int main(int argc, char *argv[]) {
-  if(argc < 6) {
-    std::cout << "./numabench <Dim Size> <Resource Width> <Degree of Parallelism> <Depth> <Is Fixed Width>" << std::endl; 
+  if(argc < 7) {
+    std::cout << "./numabench <Dim Size> <Resource Width> <Degree of Parallelism> <Depth> <Is Fixed Width> <Compute Mode>" << std::endl; 
     return 0;
   }
   // MatMulTAO(uint32_t _size, int _width, real_t *_A, real_t *_B)
@@ -65,6 +85,7 @@ int main(int argc, char *argv[]) {
   int dop = atoi(argv[3]);
   int depth = atoi(argv[4]);
   bool is_fixed_width = atoi(argv[5]) != 0; // mostly for testing NUMA aware scheduling
+  int compute_mode = atoi(argv[6]); // 0 Compute bound, 1 Memory Bound, 2 Mixed
   if(is_fixed_width) {
     assert((dop % resource_width) == 0);
   } else {
@@ -80,7 +101,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Degree of Parallelism: " << dop << std::endl;
   std::cout << "Depth: " << depth << std::endl;
   std::cout << "Is fixed width: " << is_fixed_width << std::endl;
-
+  std::cout << "Compute mode: " << compute_mode << std::endl;
   // vector<MatMulTAO*> matmulTAOs(matmul_counter);
   // vector<StreamTAO*> streamTAOs(stream_counter);
   gotao_init();
@@ -88,8 +109,13 @@ int main(int argc, char *argv[]) {
   bool toggle = false;
   for(int j = 0; j < dop; j+=resource_width) { 
     InitTAO* tao = new InitTAO(dim_size, resource_width);
-    tao->workload_hint = j / numa_group;
-    tao->set_sta(j / float(dop));
+#ifndef NO_STA
+    float sta = j / float(dop);
+    tao->workload_hint = (sta * gotao_nthreads) / numa_group;
+    //std::cout << "workload hint for " << j << " is " << tao->workload_hint << std::endl;
+    //tao->workload_hint = 0;// j / numa_group;
+    tao->set_sta(sta);
+ #endif   
     headTAOs.push_back(tao);
   }
   // build critical path
@@ -101,7 +127,7 @@ int main(int argc, char *argv[]) {
   for(int i = 1; i < headTAOs.size(); ++i) {
     InitTAO* tao = dynamic_cast<InitTAO*>(headTAOs[i]);
     assert(tao != NULL);
-    buildDAG(tao, critical_path, {tao->A, tao->B, tao->C} ,dim_size, resource_width, 0, depth, toggle);
+    buildDAG(tao, critical_path, {tao->A, tao->B, tao->C} ,dim_size, resource_width, 0, depth, compute_mode, toggle);
     toggle = !toggle;
   }
   for(int i = 0; i < headTAOs.size(); ++i) { 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <assert.h>
 #if defined(DEBUG)
 #include <iostream>
 #endif
@@ -241,19 +242,25 @@ int PolyTask::globalsearch_PTT(int nthread, PolyTask * it){
 }
 
 bool PolyTask::has_better_partition(int thread_a, int thread_b){
-  // auto ptt_val1 = this->get_timetable(thread_a, 0);
-  // auto ptt_val2 = this->get_timetable(thread_b, 0);
-  // if(ptt_val1 < ptt_val2) return true;
-  // return false;
-  if(rand()%10 == 0) return true; 
+  //return true;
+//  auto ptt_val1 = this->get_timetable(thread_a, 0);
+//  auto ptt_val2 = this->get_timetable(thread_b, 0);
+//  if(ptt_val1 < ptt_val2) return true;
+//  return false;
+  //if(rand()%10 == 0) return true; 
   float shortest_exec = 1000.0f;
   float comp_perf = 0.0f; 
+  int leader = -1, width = -1;
   auto&& partitions_a = inclusive_partitions[thread_a];
   for(auto&& elem : partitions_a) {
-    int leader = elem.first;
-    int width  = elem.second;
+    leader = elem.first;
+    width  = elem.second;
     auto&& ptt_val = this->get_timetable(leader, width - 1);
-    if(ptt_val == 0.0f) return true;
+    if(ptt_val == 0.0f) { 
+      this->leader = leader;
+      this->width  = width;
+      return true;
+    }
     comp_perf = width * ptt_val;
     //comp_perf = ptt_val;
     if (comp_perf < shortest_exec) {
@@ -263,8 +270,8 @@ bool PolyTask::has_better_partition(int thread_a, int thread_b){
   auto&& partitions_b = inclusive_partitions[thread_b];
   if(shortest_exec > 0.0f) {
     for(auto&& elem : partitions_b) {
-      int leader = elem.first;
-      int width  = elem.second;
+      leader = elem.first;
+      width  = elem.second;
       auto&& ptt_val = this->get_timetable(leader, width - 1);
       if(ptt_val == 0.0f) return false;
       comp_perf = width * ptt_val;
@@ -274,6 +281,8 @@ bool PolyTask::has_better_partition(int thread_a, int thread_b){
       }
     }
   }
+  this->leader = leader;
+  this->width  = width;  
   return true;
 }
 #endif
@@ -395,7 +404,7 @@ PolyTask * PolyTask::commit_and_wakeup(int _nthread){
         int ndx = (*it)->affinity_queue;
         if((ndx == -1) || (((*it)->affinity_queue/(*it)->width) == (_nthread/(*it)->width)))
           ndx = _nthread;
-
+//        assert(_nthread == ndx);
         //history_mold(_nthread,(*it)); 
         
         // seems like we acquire and release the lock for each assembly. 

@@ -375,9 +375,10 @@ int worker_loop(int nthread)
       }
       else if(st->type == TASK_ASSEMBLY){
         AssemblyTask *assembly = (AssemblyTask *) st;
-#ifndef CRIT_PERF_SCHED 
-        assembly->leader = nthread / assembly->width * assembly->width; // homogenous calculation of leader core
-#endif        
+//#ifndef CRIT_PERF_SCHED
+        if(assembly->leader == -1) 
+          assembly->leader = nthread / assembly->width * assembly->width; // homogenous calculation of leader core
+//#endif        
 #ifdef DEBUG
         LOCK_ACQUIRE(output_lck);
         std::cout << "[DEBUG] Distributing assembly task " << assembly->taskid << " with width " << assembly->width << " and leader " << assembly->leader << " to workers [" << assembly->leader << "," << assembly->leader + assembly->width << ")" << std::endl;
@@ -472,7 +473,7 @@ int worker_loop(int nthread)
       worker_ready_q[nthread].pop_front();
       LOCK_RELEASE(worker_lock[nthread]);
 #if defined(CRIT_PERF_SCHED)
-      st->history_mold(nthread, st);
+     // st->history_mold(nthread, st);
 #endif      
 #ifdef DEBUG
       LOCK_ACQUIRE(output_lck);
@@ -496,7 +497,7 @@ int worker_loop(int nthread)
         if(!worker_ready_q[random_core].empty()){
           st = worker_ready_q[random_core].back(); 
 #if defined(CRIT_PERF_SCHED) && defined (STA_AWARE_STEALING)
-          if (!(st->has_better_partition(nthread, random_core))) {
+          if (!(st->has_better_partition(random_core, nthread))) {
             LOCK_RELEASE(worker_lock[random_core]); 
             st = NULL;
             continue;
@@ -510,8 +511,8 @@ int worker_loop(int nthread)
           std::cout << "[DEBUG] Thread " << nthread << " steal a task from " << random_core << " successfully. \n";
           LOCK_RELEASE(output_lck);          
     #endif     
-#if defined(CRIT_PERF_SCHED)          
-          st->history_mold(nthread, st);     
+#if defined(CRIT_PERF_SCHED) && !defined(STA_AWARE_STEALING)          
+       //   st->history_mold(nthread, st);     
 #endif          
         }
         LOCK_RELEASE(worker_lock[random_core]);  
