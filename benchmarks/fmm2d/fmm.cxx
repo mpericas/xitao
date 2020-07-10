@@ -57,6 +57,7 @@ int main(int argc, char ** argv) {
     downwardPass(cells);                                          // Downward pass for L2L, L2P
     stop("L2L & L2P");                                            // Stop timer
     stop("Total FMM");                                            // Stop Total FMM timer
+#ifdef DIRECT    
     //! Direct N-Body
     start("Direct N-Body");                                       // Start timer
     const int numTargets = 10;                                    // Number of targets for checking answer
@@ -86,6 +87,7 @@ int main(int argc, char ** argv) {
     printf("--- %-16s ------------\n", "FMM vs. direct");         // Print message
     printf("%-20s : %8.5e\n","Rel. L2 Error (p)", sqrt(pDif/pNrm));// Print potential error
     printf("%-20s : %8.5e\n","Rel. L2 Error (F)", sqrt(FDif/FNrm));// Print force error
+#endif 
   }
   return 0;
 }
