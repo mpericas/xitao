@@ -30,9 +30,6 @@ public:
 #endif
   //  A non moldable  task
   bool no_mold;
-  // Increment the task pool upon construction. 
-  // Set to false if no task will be spawned from this object (coarsening)
-  bool add_to_task_pool;
   // An integer descriptor to distinguish the workload of several TAOs of the same type
   // it is mainly used by the scheduler when picking up the correct PTT
   size_t workload_hint;
@@ -87,7 +84,7 @@ public:
   //Find suitable thread for prio task
   //int find_thread(int nthread, PolyTask * it);
 #endif
-  PolyTask(int t, bool increment_pool, int _nthread);
+  PolyTask(int t, int _nthread);
   
   //! Convert from an STA to an actual queue number
   /*!

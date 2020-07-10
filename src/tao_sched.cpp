@@ -209,6 +209,7 @@ void gotao_init_hw( int nthr, int thrb, int nhwc)
 // Initialize gotao from environment vars or defaults
 void gotao_init()
 {
+  //assert(PolyTask::pending_tasks == 0);
   gotao_init_hw(-1, -1, -1);
 }
 
@@ -225,7 +226,7 @@ void gotao_fini()
   gotao_can_exit = true;
   gotao_started = false;
   //gotao_initialized = false;
-  tao_total_steals = 0;  
+  //tao_total_steals = 0;  
   for(int i = 0; i < gotao_nthreads; i++){
     t[i]->join();
   }
