@@ -1,3 +1,5 @@
+This repository is now deprecated. Please go to https://github.com/CHART-Team/xitao for the current version
+
 # XiTAO RUNTIME #
 XiTAO is an lightweight layer built on top of modern C++ features with the goals of being low-overhead and serving as a development platform for testing scheduling and resource management algorithms. XiTAO is built on a generalized model of task which that assembles (1) concurrency, (2) an embedded scheduler and (3) a resizeable resource container. These TAOs (Task Assembly Objects) are moldable entities that can be scheduled into elastic resource partitioning, aka "elastic places". XiTAO targets better mapping between tasks and hardware resources such as cores, caches or interconnect bandwidth. Therefore, among other features, XiTAO provides fast parallelism at low overhead, with constructive sharing and interference-avoidance. Recently, XiTAO has been extended with novel high-level programming constructs, and with instrospective scheduling techniques that allow it to adapt to dynamic events as well as better target the goals of energy-efficiency. 
 
